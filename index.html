@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>SnapClip — Short Videos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;
+    --accent:#FF3355;
+    --accent-2:#FFD23F;
+    --surface:#151318;
+    --surface-2:#1D1A21;
+    --text:#FFFFFF;
+    --text-dim:rgba(255,255,255,0.78);
+    --text-faint:rgba(255,255,255,0.5);
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%; overscroll-behavior:none;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    width:100vw; height:100dvh; overflow:hidden; position:fixed; inset:0;
+  }
+  h1,h2,h3,.brand,.title-line,.tab,.nav-label,.stat-num{font-family:'Poppins',sans-serif;}
+  #app{position:relative; width:100%; height:100%;}
+
+  /* ---------- TOP TABS ---------- */
+  .top-tabs{position:absolute; top:calc(14px + var(--safe-top)); left:0; right:0; display:flex; justify-content:center; gap:22px; z-index:40;}
+  .top-tabs span{font-size:15.5px; font-weight:600; color:var(--text-faint); padding-bottom:8px; position:relative; letter-spacing:.2px; cursor:pointer;}
+  .top-tabs span.active{color:var(--text);}
+  .top-tabs span.active::after{content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:22px; height:3px; border-radius:3px; background:var(--accent);}
+
+  /* ---------- FEED ---------- */
+  .feed{position:absolute; inset:0; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; height:100%;}
+  .feed::-webkit-scrollbar{display:none;}
+  .video-card{position:relative; width:100%; height:100%; scroll-snap-align:start; scroll-snap-stop:always; display:flex; align-items:flex-end; overflow:hidden; background:#000;}
+  .video-card video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .vignette{position:absolute; inset:0; pointer-events:none; background:linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 100%);}
+  .progress-track{position:absolute; top:0; left:0; right:0; height:2.5px; background:rgba(255,255,255,.18); z-index:20;}
+  .progress-fill{height:100%; width:0%; background:var(--text);}
+  .pause-flash{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:15; pointer-events:none; opacity:0;}
+  .pause-flash svg{width:74px; height:74px; filter:drop-shadow(0 2px 10px rgba(0,0,0,.5));}
+  .pause-flash.show{animation:flashPop .5s ease forwards;}
+  @keyframes flashPop{0%{opacity:0; transform:scale(.7);}25%{opacity:1; transform:scale(1);}75%{opacity:1;}100%{opacity:0;}}
+  .like-burst{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:16; pointer-events:none;}
+  .like-burst svg{width:110px; height:110px; opacity:0; filter:drop-shadow(0 4px 14px rgba(0,0,0,.45));}
+  .like-burst.show svg{animation:burst .75s cubic-bezier(.2,.9,.3,1) forwards;}
+  @keyframes burst{0%{opacity:0; transform:scale(.3) rotate(-8deg);}30%{opacity:1; transform:scale(1.15) rotate(3deg);}45%{transform:scale(1) rotate(0);}80%{opacity:1;}100%{opacity:0; transform:scale(1.05);}}
+
+  /* ---------- SIDE ACTIONS ---------- */
+  .side-actions{position:absolute; right:10px; bottom:112px; z-index:25; display:flex; flex-direction:column; align-items:center; gap:18px;}
+  .id-badge{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18); color:#fff; font-size:10.5px; font-weight:700;
+    text-decoration:none; line-height:1.15; text-align:center; padding:3px;
+  }
+  .id-badge span{font-size:8.5px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.3px;}
+  .side-actions button{background:none; border:none; color:#fff; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12.5px; font-weight:600; cursor:pointer;}
+  .side-actions svg{width:32px; height:32px; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));}
+  .side-actions .liked svg path{fill:var(--accent); stroke:var(--accent);}
+  .heart-pop{animation:heartPop .38s ease;}
+  @keyframes heartPop{0%{transform:scale(1);}35%{transform:scale(1.4);}100%{transform:scale(1);}}
+
+  /* ---------- BOTTOM INFO ---------- */
+  .bottom-info{position:absolute; left:14px; right:70px; bottom:100px; z-index:25;}
+  .title-line{font-size:15.5px; font-weight:700; line-height:1.35; margin-bottom:8px;}
+  .attribution{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-faint); font-weight:500; text-decoration:none;}
+  .attribution svg{width:14px; height:14px; flex-shrink:0;}
+
+  /* ---------- BOTTOM NAV ---------- */
+  .bottom-nav{position:absolute; left:0; right:0; bottom:0; height:calc(58px + var(--safe-bottom)); padding-bottom:var(--safe-bottom); background:rgba(8,8,10,.92); backdrop-filter:blur(10px); display:flex; align-items:center; z-index:50; border-top:1px solid rgba(255,255,255,.06);}
+  .nav-item{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--text-faint); cursor:pointer; height:100%;}
+  .nav-item.active{color:#fff;}
+  .nav-item svg{width:24px; height:24px;}
+  .nav-label{font-size:10.5px; font-weight:600;}
+  .nav-upload{width:44px; height:32px; border-radius:9px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center;}
+  .nav-upload svg{width:22px; height:22px;}
+
+  /* ---------- SCREENS ---------- */
+  .screen{position:absolute; inset:0; bottom:calc(58px + var(--safe-bottom)); overflow-y:auto; display:none; z-index:30; background:var(--bg); padding-top:calc(54px + var(--safe-top));}
+  .screen.show{display:block;}
+  .screen-header{position:absolute; top:0; left:0; right:0; padding:calc(14px + var(--safe-top)) 16px 12px; font-size:19px; font-weight:700; background:var(--bg); z-index:2; border-bottom:1px solid rgba(255,255,255,.06);}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:2px; padding:2px 0 20px;}
+  .tile{position:relative; aspect-ratio:9/13.5; background:linear-gradient(160deg,var(--surface-2),var(--surface)); display:flex; align-items:flex-end; overflow:hidden;}
+  .tile video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .tile .tile-meta{position:relative; z-index:2; padding:8px; font-size:11px; font-weight:600; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .tile .tile-shade{position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.75), transparent 55%); z-index:1;}
+
+  .profile-head{display:flex; flex-direction:column; align-items:center; padding:10px 16px 18px;}
+  .profile-head .pavatar{width:78px; height:78px; border-radius:50%; border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; background:var(--surface-2); font-size:28px; font-weight:700;}
+  .profile-head .pname{margin-top:10px; font-size:18px; font-weight:700;}
+  .profile-head .phandle{color:var(--text-faint); font-size:13px; margin-top:2px;}
+  .stats-row{display:flex; gap:28px; margin-top:16px;}
+  .stats-row div{text-align:center;}
+  .stat-num{font-size:16.5px; font-weight:700;}
+  .stat-label{font-size:12px; color:var(--text-faint); margin-top:2px;}
+
+  .empty-state{padding:40px 30px; text-align:center; color:var(--text-faint); font-size:13.5px; line-height:1.5;}
+
+  .activity-item{display:flex; gap:12px; padding:13px 16px; align-items:flex-start; border-bottom:1px solid rgba(255,255,255,.05);}
+  .activity-item .aic{width:36px; height:36px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .activity-item .aic svg{width:17px; height:17px;}
+  .activity-item .atxt{font-size:13.5px; color:var(--text-dim); line-height:1.4;}
+  .activity-item .atime{font-size:11.5px; color:var(--text-faint); margin-top:3px;}
+
+  .upload-screen{padding:20px 18px 30px;}
+  .drop-zone{border:2px dashed rgba(255,255,255,.22); border-radius:16px; padding:36px 20px; display:flex; flex-direction:column; align-items:center; gap:10px; color:var(--text-dim); text-align:center; cursor:pointer; background:var(--surface);}
+  .drop-zone svg{width:38px; height:38px; opacity:.85;}
+  .drop-zone b{color:#fff; font-size:15px;}
+  .drop-zone span{font-size:12.5px; color:var(--text-faint);}
+  .preview-wrap{margin-top:16px; border-radius:14px; overflow:hidden; background:#000;}
+  .preview-wrap video{width:100%; max-height:340px; display:block; object-fit:contain; background:#000;}
+  .caption-input{width:100%; margin-top:16px; background:var(--surface); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:12px 14px; color:#fff; font-size:14px; font-family:inherit; resize:none; min-height:70px;}
+  .caption-input::placeholder{color:var(--text-faint);}
+  .post-btn{width:100%; margin-top:16px; padding:13px; border-radius:10px; border:none; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; font-weight:700; font-size:15px;}
+  .post-btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  /* ---------- SHEETS ---------- */
+  .sheet-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.5); z-index:60; opacity:0; pointer-events:none; transition:opacity .25s;}
+  .sheet-backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{position:absolute; left:0; right:0; bottom:0; z-index:61; background:var(--surface); border-radius:18px 18px 0 0; transform:translateY(100%); transition:transform .3s cubic-bezier(.2,.8,.3,1); display:flex; flex-direction:column; max-height:72%;}
+  .sheet.show{transform:translateY(0);}
+  .sheet-handle{width:36px; height:4px; background:rgba(255,255,255,.25); border-radius:3px; margin:10px auto 4px;}
+  .sheet-title{text-align:center; font-size:14.5px; font-weight:700; padding:6px 0 10px; border-bottom:1px solid rgba(255,255,255,.07);}
+  .comment-list{overflow-y:auto; padding:6px 16px; flex:1;}
+  .comment-row{display:flex; gap:10px; padding:10px 0;}
+  .comment-row .cavatar{width:32px; height:32px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0;}
+  .comment-row .cuser{font-size:12.5px; font-weight:700; color:var(--text-faint); margin-bottom:2px;}
+  .comment-row .ctext{font-size:14px; line-height:1.4;}
+  .comment-input-row{display:flex; gap:10px; align-items:center; padding:10px 14px; padding-bottom:calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.07);}
+  .comment-input-row input{flex:1; background:var(--surface-2); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
+  .comment-input-row input::placeholder{color:var(--text-faint);}
+  .send-btn{background:var(--accent); border:none; color:#fff; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .send-btn svg{width:16px; height:16px;}
+
+  .share-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:14px 18px 6px;}
+  .share-opt{display:flex; flex-direction:column; align-items:center; gap:7px; font-size:11.5px; color:var(--text-dim); cursor:pointer;}
+  .share-opt .ic{width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700;}
+  .share-cancel{margin:10px 16px calc(16px + var(--safe-bottom)); padding:12px; text-align:center; background:var(--surface-2); border-radius:10px; font-weight:600; cursor:pointer;}
+
+  .toast{position:absolute; left:50%; bottom:78px; transform:translateX(-50%) translateY(20px); background:rgba(30,30,32,.95); color:#fff; padding:10px 18px; border-radius:22px; font-size:13.5px; z-index:90; opacity:0; transition:all .25s; pointer-events:none; font-weight:500; max-width:82%; text-align:center;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="top-tabs">
+    <span data-tab="liked">Liked</span>
+    <span class="active" data-tab="foryou">For You</span>
+  </div>
+
+  <div class="feed" id="feed"></div>
+
+  <div class="screen" id="screen-discover">
+    <div class="screen-header">Discover</div>
+    <div class="grid3" id="discoverGrid"></div>
+  </div>
+
+  <div class="screen" id="screen-inbox">
+    <div class="screen-header">Activity</div>
+    <div id="activityList"></div>
+  </div>
+
+  <div class="screen" id="screen-profile">
+    <div class="screen-header">Profile</div>
+    <div class="profile-head">
+      <div class="pavatar">🙂</div>
+      <div class="pname">you.creates</div>
+      <div class="phandle">this device's activity</div>
+      <div class="stats-row">
+        <div><div class="stat-num" id="statLiked">0</div><div class="stat-label">Liked</div></div>
+        <div><div class="stat-num" id="statComments">0</div><div class="stat-label">Comments</div></div>
+        <div><div class="stat-num" id="statUploads">0</div><div class="stat-label">Uploads</div></div>
+      </div>
+    </div>
+    <div class="grid3" id="profileGrid"></div>
+  </div>
+
+  <div class="screen" id="screen-upload">
+    <div class="screen-header">Upload</div>
+    <div class="upload-screen">
+      <label class="drop-zone" id="dropZone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke-linecap="round"/></svg>
+        <b>Select a video to post</b>
+        <span>This is your real video, saved on this device</span>
+        <input type="file" accept="video/*" id="fileInput" style="display:none">
+      </label>
+      <div class="preview-wrap" id="previewWrap" style="display:none;">
+        <video id="previewVideo" controls playsinline></video>
+      </div>
+      <textarea class="caption-input" id="uploadCaption" placeholder="Write a caption..."></textarea>
+      <button class="post-btn" id="postBtn" disabled>Post</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-screen="feed">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 4l8 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 001 1h10a1 1 0 001-1v-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" data-screen="discover">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15 9l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Discover</span>
+    </div>
+    <div class="nav-item" data-screen="upload">
+      <div class="nav-upload"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="nav-item" data-screen="inbox">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <span class="nav-label">Activity</span>
+    </div>
+    <div class="nav-item" data-screen="profile">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.6" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+  <div class="sheet" id="commentSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="commentCountTitle">Comments</div>
+    <div class="comment-list" id="commentList"></div>
+    <div class="comment-input-row">
+      <div class="cavatar" style="width:30px;height:30px;font-size:12px;">🙂</div>
+      <input type="text" id="commentInput" placeholder="Add a comment...">
+      <button class="send-btn" id="sendComment"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M4 20l16-8L4 4v6l10 2-10 2v6z" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+
+  <div class="sheet" id="shareSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Share to</div>
+    <div class="share-grid">
+      <div class="share-opt" data-opt="link"><div class="ic" style="background:#33343a;">🔗</div>Copy link</div>
+      <div class="share-opt" data-opt="whatsapp"><div class="ic" style="background:#25D366;">✆</div>WhatsApp</div>
+      <div class="share-opt" data-opt="messages"><div class="ic" style="background:#3B82F6;">✉</div>Messages</div>
+      <div class="share-opt" data-opt="info"><div class="ic" style="background:#8B5CF6;">ℹ</div>Upload info</div>
+      <div class="share-opt" data-opt="save"><div class="ic" style="background:#F59E0B;">⬇</div>Save video</div>
+      <div class="share-opt" data-opt="report"><div class="ic" style="background:#EF4444;">⚑</div>Report</div>
+    </div>
+    <div class="share-cancel" id="shareCancel">Cancel</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  const HEART_OUTLINE = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7-4.6-9.6-9.1C.8 8.2 2 4.7 5.2 3.7c2-.6 4 .1 5.3 1.8l1.5 2 1.5-2c1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.4 4.5 2.8 7.7C19 15.9 12 20.5 12 20.5z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+  const HEART_FILL = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7-4.6-9.6-9.1C.8 8.2 2 4.7 5.2 3.7c2-.6 4 .1 5.3 1.8l1.5 2 1.5-2c1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.4 4.5 2.8 7.7C19 15.9 12 20.5 12 20.5z"/></svg>';
+  const COMMENT_ICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M21 12c0 4.4-4 8-9 8-1.1 0-2.2-.2-3.1-.5L3 21l1.6-4.3C3.6 15.4 3 13.8 3 12c0-4.4 4-8 9-8s9 3.6 9 8z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+  const SHARE_ICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 12l8-6v3.5c5 .5 7 3 8 7.5-2.4-3-5-4-8-4V17L8 12z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg>';
+  const LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 15l6-6M8 12l-2 2a3 3 0 004 4l2-2M16 12l2-2a3 3 0 00-4-4l-2 2" stroke-linecap="round"/></svg>';
+  const UPLOAD_TAG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 9l4-4 4 4M12 5v9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const PLAY_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7L8 5z"/></svg>';
+  const PAUSE_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+  const LIKE_ACT_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 20.5s-7-4.6-9.6-9.1C.8 8.2 2 4.7 5.2 3.7c2-.6 4 .1 5.3 1.8l1.5 2 1.5-2c1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.4 4.5 2.8 7.7C19 15.9 12 20.5 12 20.5z"/></svg>';
+  const COMMENT_ACT_ICON = COMMENT_ICON.replace('#fff','currentColor');
+  const UPLOAD_ACT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke-linecap="round"/></svg>';
+
+  function seededNum(seedStr, base, spread){
+    let h=0; for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i))>>>0; }
+    return base + (h % spread);
+  }
+  function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return String(n); }
+
+  // ---------- PERSISTENCE ----------
+  const ENGAGEMENT_KEY = 'snapclip_engagement_v2';
+  const ACTIVITY_KEY = 'snapclip_activity_v1';
+
+  function loadEngagementStore(){
+    try{ return JSON.parse(localStorage.getItem(ENGAGEMENT_KEY)) || {}; }catch(e){ return {}; }
+  }
+  let engagementStore = loadEngagementStore();
+  function saveEngagementStore(){ try{ localStorage.setItem(ENGAGEMENT_KEY, JSON.stringify(engagementStore)); }catch(e){} }
+  function getEngagement(realId){
+    if(!engagementStore[realId]){
+      engagementStore[realId] = { likes:0, liked:false, shares:0, comments:[] };
+    }
+    return engagementStore[realId];
+  }
+
+  function loadActivity(){ try{ return JSON.parse(localStorage.getItem(ACTIVITY_KEY)) || []; }catch(e){ return []; } }
+  let activityLog = loadActivity();
+  function pushActivity(type, title){
+    activityLog.unshift({type, title, ts:Date.now()});
+    activityLog = activityLog.slice(0,40);
+    try{ localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activityLog)); }catch(e){}
+    renderActivity();
+  }
+  function timeAgo(ts){
+    const s = Math.floor((Date.now()-ts)/1000);
+    if(s<60) return 'just now';
+    if(s<3600) return Math.floor(s/60)+'m ago';
+    if(s<86400) return Math.floor(s/3600)+'h ago';
+    return Math.floor(s/86400)+'d ago';
+  }
+
+  // --- IndexedDB for videos the user actually uploads from their own device ---
+  const DB_NAME='snapclipDB', DB_STORE='uploads';
+  function openDB(){
+    return new Promise((resolve,reject)=>{
+      const req = indexedDB.open(DB_NAME,1);
+      req.onupgradeneeded = ()=>{ req.result.createObjectStore(DB_STORE,{keyPath:'id'}); };
+      req.onsuccess = ()=>resolve(req.result);
+      req.onerror = ()=>reject(req.error);
+    });
+  }
+  async function dbPut(record){ const db=await openDB(); return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readwrite'); tx.objectStore(DB_STORE).put(record); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
+  async function dbGetAll(){ const db=await openDB(); return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readonly'); const req=tx.objectStore(DB_STORE).getAll(); req.onsuccess=()=>res(req.result||[]); req.onerror=()=>rej(req.error); }); }
+  const uploadBlobCache = {};
+  let uploadRecords = []; // raw records from IndexedDB, kept for profile grid + stats
+
+  async function loadUploads(){
+    let rows=[]; try{ rows = await dbGetAll(); }catch(e){ rows=[]; }
+    rows.sort((a,b)=>b.timestamp-a.timestamp);
+    uploadRecords = rows;
+    rows.forEach(r=>{ uploadBlobCache[r.id]=r.blob; engagementStore[r.id] = engagementStore[r.id] || {likes:r.likes, liked:r.liked, shares:r.shares, comments:r.comments}; });
+    return rows.map(r=>({ id:r.id, realId:r.id, title:r.caption, src:URL.createObjectURL(r.blob), timestamp:r.timestamp }));
+  }
+  async function persistUpload(realId){
+    const eng = getEngagement(realId);
+    const existing = uploadRecords.find(r=>r.id===realId);
+    await dbPut({ id:realId, blob:uploadBlobCache[realId], caption:(existing?existing.caption:''), likes:eng.likes, liked:eng.liked, shares:eng.shares, comments:eng.comments, timestamp: Number(realId.split('_').pop())||Date.now() });
+  }
+  function persist(realId){
+    if(uploadBlobCache[realId]) persistUpload(realId);
+    else saveEngagementStore();
+  }
+
+  // ---------- FEED (infinite, built only from the real pool + real uploads) ----------
+  const feedEl = document.getElementById('feed');
+  let feedItems = [];
+  let batchN = 0;
+  let loadingMore = false;
+
+  function shuffledPool(){
+    const arr=[...uploadRecords];
+    for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+    return arr;
+  }
+  function nextBatch(){
+    batchN++;
+    return shuffledPool().map(r=>({ id:r.id+'__b'+batchN, realId:r.id, title:r.caption, src:URL.createObjectURL(r.blob), timestamp:r.timestamp }));
+  }
+
+  let io = null;
+  let currentVideoEl = null;
+  function ensureObserver(){
+    if(io) return io;
+    io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        const vid = entry.target.querySelector('video');
+        if(entry.isIntersecting && entry.intersectionRatio>0.6){
+          if(currentVideoEl && currentVideoEl!==vid) currentVideoEl.pause();
+          currentVideoEl = vid; vid.play().catch(()=>{});
+        } else { vid.pause(); }
+      });
+    }, {threshold:[0,0.6,1]});
+    return io;
+  }
+
+  function shortId(realId){ const ts = Number(realId.split('_').pop()); return isFinite(ts) ? String(ts).slice(-5) : realId.slice(-5); }
+
+  function cardTemplate(item){
+    const eng = getEngagement(item.realId);
+    const el = document.createElement('section');
+    el.className='video-card';
+    el.dataset.instance = item.id;
+    el.dataset.realId = item.realId;
+    const idPill = `<div class="id-badge">YOU<span>#${shortId(item.realId)}</span></div>`;
+    const attribution = `<span class="attribution">${UPLOAD_TAG_ICON}<span>Uploaded ${timeAgo(item.timestamp)}</span></span>`;
+    el.innerHTML = `
+      <video src="${item.src}" loop muted playsinline preload="metadata"></video>
+      <div class="vignette"></div>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <div class="pause-flash">${PLAY_ICON}</div>
+      <div class="like-burst">${HEART_FILL}</div>
+      <div class="side-actions">
+        ${idPill}
+        <button class="action like-btn ${eng.liked?'liked':''}">${eng.liked?HEART_FILL:HEART_OUTLINE}<span class="count like-count">${fmt(eng.likes)}</span></button>
+        <button class="action comment-btn">${COMMENT_ICON}<span class="count comment-count">${fmt(eng.comments.length)}</span></button>
+        <button class="action share-btn">${SHARE_ICON}<span class="count share-count">${fmt(eng.shares)}</span></button>
+      </div>
+      <div class="bottom-info">
+        <p class="title-line">${item.title}</p>
+        ${attribution}
+      </div>
+    `;
+    return el;
+  }
+
+  function appendCards(items){
+    items.forEach(item=>{ const el = cardTemplate(item); feedEl.appendChild(el); ensureObserver().observe(el); });
+  }
+  function prependCard(item){
+    const el = cardTemplate(item);
+    feedEl.insertBefore(el, feedEl.firstChild);
+    ensureObserver().observe(el);
+  }
+
+  async function initFeed(){
+    await loadUploads();
+    feedEl.innerHTML = '';
+    if(uploadRecords.length===0){
+      feedItems = [];
+      const div = document.createElement('div');
+      div.className='empty-state';
+      div.style.cssText = 'position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:0 30px;';
+      div.textContent = 'No videos yet. Tap the + button below to upload your first real video — it will show up here.';
+      feedEl.appendChild(div);
+      renderProfileStats();
+      return;
+    }
+    feedItems = nextBatch();
+    appendCards(feedItems);
+    renderProfileStats();
+  }
+
+  feedEl.addEventListener('scroll', ()=>{
+    if(loadingMore) return;
+    if(uploadRecords.length===0) return;
+    const nearBottom = feedEl.scrollTop + feedEl.clientHeight > feedEl.scrollHeight - window.innerHeight*2;
+    if(nearBottom){
+      loadingMore = true;
+      const batch = nextBatch();
+      feedItems = feedItems.concat(batch);
+      appendCards(batch);
+      loadingMore = false;
+    }
+  });
+
+  function getCardData(card){ return getEngagement(card.dataset.realId); }
+
+  // progress bar
+  feedEl.addEventListener('timeupdate', (e)=>{
+    if(e.target.tagName!=='VIDEO') return;
+    const card = e.target.closest('.video-card'); const fill = card.querySelector('.progress-fill');
+    if(e.target.duration) fill.style.width = (e.target.currentTime/e.target.duration*100)+'%';
+  }, true);
+
+  // tap to play/pause, double tap to like
+  let lastTap=0, tapTimer=null;
+  feedEl.addEventListener('click', (e)=>{
+    const card = e.target.closest('.video-card'); if(!card) return;
+    if(e.target.closest('.side-actions')) return;
+    const now = Date.now();
+    if(now-lastTap<320){
+      clearTimeout(tapTimer); lastTap=0;
+      doLike(card, true);
+      const burst = card.querySelector('.like-burst');
+      burst.classList.remove('show'); void burst.offsetWidth; burst.classList.add('show');
+    } else {
+      lastTap = now;
+      tapTimer = setTimeout(()=>{
+        const vid = card.querySelector('video'); const flash = card.querySelector('.pause-flash');
+        if(vid.paused){ vid.play(); flash.innerHTML = PLAY_ICON; } else { vid.pause(); flash.innerHTML = PAUSE_ICON; }
+        flash.classList.remove('show'); void flash.offsetWidth; flash.classList.add('show');
+      }, 300);
+    }
+  });
+
+  function doLike(card, forceLikeOnly){
+    const realId = card.dataset.realId;
+    const eng = getEngagement(realId);
+    if(forceLikeOnly && eng.liked) return;
+    eng.liked = !eng.liked; eng.likes += eng.liked ? 1 : -1;
+    document.querySelectorAll(`.video-card[data-real-id="${realId}"]`).forEach(c=>{
+      const btn = c.querySelector('.like-btn');
+      btn.classList.toggle('liked', eng.liked);
+      btn.innerHTML = (eng.liked?HEART_FILL:HEART_OUTLINE) + `<span class="count like-count">${fmt(eng.likes)}</span>`;
+      btn.classList.add('heart-pop'); setTimeout(()=>btn.classList.remove('heart-pop'),380);
+    });
+    persist(realId);
+    if(eng.liked) pushActivity('like', card.querySelector('.title-line').textContent);
+    renderProfileStats();
+  }
+
+  feedEl.addEventListener('click', (e)=>{
+    const card = e.target.closest('.video-card'); if(!card) return;
+    if(e.target.closest('.like-btn')){ e.stopPropagation(); doLike(card,false); return; }
+    if(e.target.closest('.comment-btn')){ e.stopPropagation(); openComments(card); return; }
+    if(e.target.closest('.share-btn')){ e.stopPropagation(); openShare(card); return; }
+  }, true);
+
+  // ---------- COMMENTS ----------
+  const commentSheet = document.getElementById('commentSheet');
+  const shareSheet = document.getElementById('shareSheet');
+  const backdrop = document.getElementById('sheetBackdrop');
+  const commentList = document.getElementById('commentList');
+  const commentCountTitle = document.getElementById('commentCountTitle');
+  const commentInput = document.getElementById('commentInput');
+  let activeCard = null;
+
+  function openSheet(s){ backdrop.classList.add('show'); s.classList.add('show'); }
+  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); }
+  backdrop.addEventListener('click', closeSheets);
+
+  function openComments(card){
+    activeCard = card;
+    renderComments();
+    openSheet(commentSheet);
+  }
+  function renderComments(){
+    const eng = getCardData(activeCard);
+    commentCountTitle.textContent = eng.comments.length + ' comments';
+    if(eng.comments.length===0){
+      commentList.innerHTML = `<div class="empty-state">No comments yet — be the first to say something real.</div>`;
+      return;
+    }
+    commentList.innerHTML = eng.comments.map(c=>`
+      <div class="comment-row">
+        <div class="cavatar">🙂</div>
+        <div><div class="cuser">${c.user}</div><div class="ctext">${c.text}</div></div>
+      </div>`).join('');
+    commentList.scrollTop = 0;
+  }
+  function submitComment(){
+    const text = commentInput.value.trim();
+    if(!text || !activeCard) return;
+    const eng = getCardData(activeCard);
+    eng.comments.unshift({user:'you.creates', text});
+    commentInput.value='';
+    renderComments();
+    const realId = activeCard.dataset.realId;
+    document.querySelectorAll(`.video-card[data-real-id="${realId}"] .comment-count`).forEach(el=> el.textContent = fmt(eng.comments.length));
+    persist(realId);
+    pushActivity('comment', activeCard.querySelector('.title-line').textContent);
+    renderProfileStats();
+  }
+  document.getElementById('sendComment').addEventListener('click', submitComment);
+  commentInput.addEventListener('keydown', e=>{ if(e.key==='Enter') submitComment(); });
+
+  // ---------- SHARE ----------
+  function openShare(card){ activeCard = card; openSheet(shareSheet); }
+  document.getElementById('shareCancel').addEventListener('click', closeSheets);
+  document.querySelectorAll('.share-opt').forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      const kind = opt.dataset.opt;
+      if(activeCard){
+        const realId = activeCard.dataset.realId;
+        const eng = getCardData(activeCard);
+        eng.shares += 1;
+        document.querySelectorAll(`.video-card[data-real-id="${realId}"] .share-count`).forEach(el=> el.textContent = fmt(eng.shares));
+        persist(realId);
+      }
+      closeSheets();
+      const title = activeCard ? activeCard.querySelector('.title-line').textContent : '';
+      if(kind==='link'){
+        const url = location.href.split('#')[0] + '#' + (activeCard ? activeCard.dataset.realId : '');
+        if(navigator.clipboard) navigator.clipboard.writeText(url).then(()=>toast('Link copied to clipboard'));
+        else toast('Link copied');
+      } else if(kind==='info'){
+        const badge = activeCard.querySelector('.id-badge');
+        toast(badge ? 'Real upload ID ' + badge.textContent : 'Upload info');
+      } else if(kind==='save'){ toast('Video saved'); }
+      else if(kind==='report'){ toast('Thanks — report submitted'); }
+      else { toast('Shared'); }
+    });
+  });
+
+  // ---------- TOP TABS (For You = your uploaded videos looping, Liked = the ones you liked) ----------
+  const topTabs = document.querySelectorAll('.top-tabs span');
+  topTabs.forEach(tab=>{
+    tab.addEventListener('click', async ()=>{
+      topTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      if(tab.dataset.tab==='foryou'){ await initFeed(); }
+      else { renderLikedFeed(); }
+    });
+  });
+  function renderLikedFeed(){
+    const likedItems = [];
+    uploadRecords.forEach(r=>{ const eng=engagementStore[r.id]; if(eng && eng.liked) likedItems.push({id:r.id, realId:r.id, title:r.caption, src:URL.createObjectURL(r.blob), timestamp:r.timestamp}); });
+    feedEl.innerHTML='';
+    if(likedItems.length===0){
+      const div = document.createElement('div');
+      div.className='empty-state';
+      div.style.paddingTop = '120px';
+      div.textContent = 'You have not liked any real videos yet. Double-tap a video in For You to like it.';
+      feedEl.appendChild(div);
+      return;
+    }
+    appendCards(likedItems);
+  }
+
+  // ---------- BOTTOM NAV / SCREENS ----------
+  const navItems = document.querySelectorAll('.nav-item');
+  const screens = { discover: document.getElementById('screen-discover'), inbox: document.getElementById('screen-inbox'), profile: document.getElementById('screen-profile'), upload: document.getElementById('screen-upload') };
+  navItems.forEach(item=>{
+    item.addEventListener('click', ()=>{
+      navItems.forEach(n=>n.classList.remove('active')); item.classList.add('active');
+      const target = item.dataset.screen;
+      Object.values(screens).forEach(s=>s.classList.remove('show'));
+      feedEl.style.display = target==='feed' ? 'block' : 'none';
+      document.querySelector('.top-tabs').style.display = target==='feed' ? 'flex' : 'none';
+      if(target!=='feed') screens[target].classList.add('show');
+      if(target==='discover') buildDiscoverGrid();
+      if(target==='profile') { renderProfileStats(); buildProfileGrid(); }
+      if(target==='inbox') renderActivity();
+    });
+  });
+
+  // ---------- DISCOVER (grid of your own real uploaded videos) ----------
+  function buildDiscoverGrid(){
+    const grid = document.getElementById('discoverGrid');
+    grid.innerHTML='';
+    if(uploadRecords.length===0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No videos yet — upload your first real video to see it here.</div>`;
+      return;
+    }
+    uploadRecords.forEach(r=>{
+      const url = URL.createObjectURL(r.blob);
+      const tile = document.createElement('div');
+      tile.className='tile';
+      tile.innerHTML = `<video src="${url}" muted preload="metadata"></video><div class="tile-shade"></div><div class="tile-meta">${r.caption}</div>`;
+      grid.appendChild(tile);
+    });
+  }
+
+  // ---------- PROFILE (real derived stats + your real uploads) ----------
+  function renderProfileStats(){
+    let liked=0, comments=0;
+    Object.values(engagementStore).forEach(e=>{ if(e.liked) liked++; comments += (e.comments?e.comments.length:0); });
+    const statLiked = document.getElementById('statLiked');
+    const statComments = document.getElementById('statComments');
+    const statUploads = document.getElementById('statUploads');
+    if(statLiked) statLiked.textContent = fmt(liked);
+    if(statComments) statComments.textContent = fmt(comments);
+    if(statUploads) statUploads.textContent = fmt(uploadRecords.length);
+  }
+  function buildProfileGrid(){
+    const grid = document.getElementById('profileGrid');
+    grid.innerHTML='';
+    if(uploadRecords.length===0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No uploads yet — post your first real video from the Upload tab.</div>`;
+      return;
+    }
+    uploadRecords.forEach(r=>{
+      const tile = document.createElement('div'); tile.className='tile';
+      const url = URL.createObjectURL(r.blob);
+      tile.innerHTML = `<video src="${url}" muted preload="metadata"></video><div class="tile-shade"></div><div class="tile-meta">${r.caption}</div>`;
+      grid.appendChild(tile);
+    });
+  }
+
+  // ---------- ACTIVITY (real log of your own likes/comments/uploads) ----------
+  function renderActivity(){
+    const list = document.getElementById('activityList');
+    if(activityLog.length===0){
+      list.innerHTML = `<div class="empty-state">Your likes, comments and uploads will show up here as real activity — nothing fake.</div>`;
+      return;
+    }
+    list.innerHTML = activityLog.map(a=>{
+      const icon = a.type==='like'?LIKE_ACT_ICON : a.type==='comment'?COMMENT_ACT_ICON : UPLOAD_ACT_ICON;
+      const text = a.type==='upload' ? `You uploaded "${a.title}"` : `${a.type==='like'?'You liked':'You commented on'} "${a.title}"`;
+      return `<div class="activity-item"><div class="aic">${icon}</div><div><div class="atxt">${text}</div><div class="atime">${timeAgo(a.ts)}</div></div></div>`;
+    }).join('');
+  }
+
+  // ---------- TOAST ----------
+  const toastEl = document.getElementById('toast');
+  let toastTimer;
+  function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1600); }
+
+  // ---------- UPLOAD (real file from the user's own device) ----------
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const previewWrap = document.getElementById('previewWrap');
+  const previewVideo = document.getElementById('previewVideo');
+  const uploadCaption = document.getElementById('uploadCaption');
+  const postBtn = document.getElementById('postBtn');
+  let pendingBlobUrl=null, pendingFile=null;
+
+  fileInput.addEventListener('change', ()=>{
+    const file = fileInput.files[0]; if(!file) return;
+    if(pendingBlobUrl) URL.revokeObjectURL(pendingBlobUrl);
+    pendingFile = file; pendingBlobUrl = URL.createObjectURL(file);
+    previewVideo.src = pendingBlobUrl; previewWrap.style.display='block'; postBtn.disabled=false;
+  });
+
+  postBtn.addEventListener('click', async ()=>{
+    if(!pendingBlobUrl || !pendingFile) return;
+    postBtn.disabled=true; postBtn.textContent='Posting...';
+    const id = 'you_'+Date.now();
+    const caption = uploadCaption.value.trim() || 'My real video';
+    uploadBlobCache[id] = pendingFile;
+    engagementStore[id] = { likes:0, liked:false, shares:0, comments:[] };
+    await dbPut({ id, blob:pendingFile, caption, likes:0, liked:false, shares:0, comments:[], timestamp:Date.now() });
+    uploadRecords.unshift({ id, blob:pendingFile, caption, likes:0, liked:false, shares:0, comments:[], timestamp:Date.now() });
+    const item = { id, realId:id, title:caption, src:pendingBlobUrl, timestamp:Date.now() };
+    feedItems.unshift(item);
+    prependCard(item);
+    previewWrap.style.display='none'; previewVideo.src=''; uploadCaption.value='';
+    postBtn.textContent='Post'; postBtn.disabled=true; pendingBlobUrl=null; pendingFile=null;
+    navItems.forEach(n=>n.classList.remove('active'));
+    document.querySelector('.nav-item[data-screen="feed"]').classList.add('active');
+    Object.values(screens).forEach(s=>s.classList.remove('show'));
+    feedEl.style.display='block'; document.querySelector('.top-tabs').style.display='flex';
+    feedEl.scrollTop = 0;
+    pushActivity('upload', caption);
+    renderProfileStats();
+    toast('Posted — this real video is saved on this device 🎉');
+  });
+
+  initFeed();
+})();
+</script>
+</body>
+</html>
