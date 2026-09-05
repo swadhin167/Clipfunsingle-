@@ -53,13 +53,9 @@
 
   /* ---------- SIDE ACTIONS ---------- */
   .side-actions{position:absolute; right:10px; bottom:112px; z-index:25; display:flex; flex-direction:column; align-items:center; gap:18px;}
-  .id-badge{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.18); color:#fff; font-size:10.5px; font-weight:700;
-    text-decoration:none; line-height:1.15; text-align:center; padding:3px;
-  }
-  .id-badge span{font-size:8.5px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.3px;}
+  .side-avatar{width:44px; height:44px; border-radius:50%; overflow:hidden; border:2px solid #fff; background:var(--surface-2); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .side-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .side-avatar .initial{font-size:17px; font-weight:700; color:#fff;}
   .side-actions button{background:none; border:none; color:#fff; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12.5px; font-weight:600; cursor:pointer;}
   .side-actions svg{width:32px; height:32px; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));}
   .side-actions .liked svg path{fill:var(--accent); stroke:var(--accent);}
@@ -68,9 +64,19 @@
 
   /* ---------- BOTTOM INFO ---------- */
   .bottom-info{position:absolute; left:14px; right:70px; bottom:100px; z-index:25;}
-  .title-line{font-size:15.5px; font-weight:700; line-height:1.35; margin-bottom:8px;}
+  .name-row{display:flex; align-items:center; gap:9px; margin-bottom:9px;}
+  .name-avatar{width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid #fff; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .name-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .name-avatar .initial{font-size:14px; font-weight:700; color:#fff;}
+  .name-text{font-size:14.5px; font-weight:700;}
+  .title-line{font-size:14.5px; line-height:1.4; margin-bottom:8px; color:var(--text-dim);}
   .attribution{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-faint); font-weight:500; text-decoration:none;}
   .attribution svg{width:14px; height:14px; flex-shrink:0;}
+
+  /* ---------- SOUND TOGGLE ---------- */
+  .sound-toggle{position:absolute; top:calc(14px + var(--safe-top)); right:16px; z-index:41; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .sound-toggle svg{width:17px; height:17px;}
+
 
   /* ---------- BOTTOM NAV ---------- */
   .bottom-nav{position:absolute; left:0; right:0; bottom:0; height:calc(58px + var(--safe-bottom)); padding-bottom:var(--safe-bottom); background:rgba(8,8,10,.92); backdrop-filter:blur(10px); display:flex; align-items:center; z-index:50; border-top:1px solid rgba(255,255,255,.06);}
@@ -92,9 +98,17 @@
   .tile .tile-shade{position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.75), transparent 55%); z-index:1;}
 
   .profile-head{display:flex; flex-direction:column; align-items:center; padding:10px 16px 18px;}
-  .profile-head .pavatar{width:78px; height:78px; border-radius:50%; border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; background:var(--surface-2); font-size:28px; font-weight:700;}
+  .profile-head .pavatar{width:78px; height:78px; border-radius:50%; border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; background:var(--surface-2); font-size:28px; font-weight:700; overflow:hidden; cursor:pointer;}
+  .profile-head .pavatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .profile-head .pname{margin-top:10px; font-size:18px; font-weight:700;}
   .profile-head .phandle{color:var(--text-faint); font-size:13px; margin-top:2px;}
+  .edit-profile-btn{margin-top:14px; background:var(--surface); border:1px solid rgba(255,255,255,.15); color:#fff; padding:9px 22px; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer;}
+  .edit-sheet-body{padding:8px 20px 4px; display:flex; flex-direction:column; align-items:center;}
+  .edit-avatar-preview{width:88px; height:88px; border-radius:50%; overflow:hidden; background:var(--surface-2); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; cursor:pointer;}
+  .edit-avatar-preview img{width:100%; height:100%; object-fit:cover; display:block;}
+  .change-photo-btn{margin-top:10px; font-size:13px; color:var(--accent); font-weight:600; cursor:pointer; background:none; border:none;}
+  .edit-name-input{width:100%; margin-top:18px; background:var(--surface-2); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:12px 14px; color:#fff; font-size:14.5px; font-family:inherit;}
+  .edit-save-btn{width:100%; margin-top:16px; padding:12px; border-radius:10px; border:none; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; font-weight:700; font-size:14.5px;}
   .stats-row{display:flex; gap:28px; margin-top:16px;}
   .stats-row div{text-align:center;}
   .stat-num{font-size:16.5px; font-weight:700;}
@@ -151,9 +165,10 @@
 <div id="app">
 
   <div class="top-tabs">
-    <span data-tab="liked">Liked</span>
+    <span data-tab="following">Following</span>
     <span class="active" data-tab="foryou">For You</span>
   </div>
+  <div class="sound-toggle" id="soundToggle"></div>
 
   <div class="feed" id="feed"></div>
 
@@ -170,9 +185,10 @@
   <div class="screen" id="screen-profile">
     <div class="screen-header">Profile</div>
     <div class="profile-head">
-      <div class="pavatar">🙂</div>
-      <div class="pname">you.creates</div>
+      <div class="pavatar" id="profileAvatar">🙂</div>
+      <div class="pname" id="profileNameDisplay">you.creates</div>
       <div class="phandle">this device's activity</div>
+      <button class="edit-profile-btn" id="editProfileBtn">Edit profile</button>
       <div class="stats-row">
         <div><div class="stat-num" id="statLiked">0</div><div class="stat-label">Liked</div></div>
         <div><div class="stat-num" id="statComments">0</div><div class="stat-label">Comments</div></div>
@@ -248,6 +264,18 @@
     <div class="share-cancel" id="shareCancel">Cancel</div>
   </div>
 
+  <div class="sheet" id="editProfileSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Edit profile</div>
+    <div class="edit-sheet-body">
+      <div class="edit-avatar-preview" id="editAvatarPreview">🙂</div>
+      <button class="change-photo-btn" id="changePhotoBtn">Change photo</button>
+      <input type="file" accept="image/*" id="avatarFileInput" style="display:none">
+      <input type="text" class="edit-name-input" id="editNameInput" placeholder="Your name" maxlength="30">
+      <button class="edit-save-btn" id="saveProfileBtn">Save</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -264,6 +292,26 @@
   const LIKE_ACT_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 20.5s-7-4.6-9.6-9.1C.8 8.2 2 4.7 5.2 3.7c2-.6 4 .1 5.3 1.8l1.5 2 1.5-2c1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.4 4.5 2.8 7.7C19 15.9 12 20.5 12 20.5z"/></svg>';
   const COMMENT_ACT_ICON = COMMENT_ICON.replace('#fff','currentColor');
   const UPLOAD_ACT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke-linecap="round"/></svg>';
+  const SOUND_ON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8.5a5 5 0 010 7" stroke-linecap="round"/><path d="M19.5 6a8.5 8.5 0 010 12" stroke-linecap="round"/></svg>';
+  const SOUND_OFF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke-linecap="round"/></svg>';
+
+  // ---------- PROFILE (name + picture, editable, saved on this device) ----------
+  const PROFILE_KEY = 'snapclip_profile_v1';
+  function loadProfile(){ try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {name:'you.creates', avatar:null}; }catch(e){ return {name:'you.creates', avatar:null}; } }
+  let profile = loadProfile();
+  function saveProfile(){ try{ localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }catch(e){} }
+  function avatarInnerHTML(){
+    return profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span class="initial">${(profile.name||'Y').trim().charAt(0).toUpperCase()}</span>`;
+  }
+  function refreshAllAvatars(){
+    document.querySelectorAll('.side-avatar').forEach(el=> el.innerHTML = avatarInnerHTML());
+    document.querySelectorAll('.name-avatar').forEach(el=> el.innerHTML = avatarInnerHTML());
+    document.querySelectorAll('.name-text').forEach(el=> el.textContent = profile.name);
+    const profileAvatarEl = document.getElementById('profileAvatar');
+    if(profileAvatarEl) profileAvatarEl.innerHTML = avatarInnerHTML();
+    const profileNameEl = document.getElementById('profileNameDisplay');
+    if(profileNameEl) profileNameEl.textContent = profile.name;
+  }
 
   function seededNum(seedStr, base, spread){
     let h=0; for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i))>>>0; }
@@ -351,6 +399,22 @@
     return shuffledPool().map(r=>({ id:r.id+'__b'+batchN, realId:r.id, title:r.caption, src:URL.createObjectURL(r.blob), timestamp:r.timestamp }));
   }
 
+  // ---------- SOUND ----------
+  const SOUND_KEY = 'snapclip_sound_v1';
+  let soundOn = localStorage.getItem(SOUND_KEY) === '1';
+  let soundHintShown = false;
+  const soundToggleEl = document.getElementById('soundToggle');
+  function renderSoundIcon(){ soundToggleEl.innerHTML = soundOn ? SOUND_ON_ICON : SOUND_OFF_ICON; }
+  renderSoundIcon();
+  soundToggleEl.addEventListener('click', ()=>{
+    soundOn = !soundOn;
+    localStorage.setItem(SOUND_KEY, soundOn ? '1' : '0');
+    renderSoundIcon();
+    document.querySelectorAll('#feed video').forEach(v=>{ v.muted = !soundOn; });
+    if(currentVideoEl) currentVideoEl.play().catch(()=>{});
+    toast(soundOn ? 'Sound on' : 'Sound off');
+  });
+
   let io = null;
   let currentVideoEl = null;
   function ensureObserver(){
@@ -360,7 +424,14 @@
         const vid = entry.target.querySelector('video');
         if(entry.isIntersecting && entry.intersectionRatio>0.6){
           if(currentVideoEl && currentVideoEl!==vid) currentVideoEl.pause();
-          currentVideoEl = vid; vid.play().catch(()=>{});
+          currentVideoEl = vid;
+          vid.muted = !soundOn;
+          vid.play().catch(()=>{
+            // Autoplay with sound was blocked — fall back to muted playback until the user taps the sound icon
+            vid.muted = true;
+            vid.play().catch(()=>{});
+            if(soundOn && !soundHintShown){ soundHintShown = true; toast('Tap the 🔊 icon to enable sound'); }
+          });
         } else { vid.pause(); }
       });
     }, {threshold:[0,0.6,1]});
@@ -375,25 +446,28 @@
     el.className='video-card';
     el.dataset.instance = item.id;
     el.dataset.realId = item.realId;
-    const idPill = `<div class="id-badge">YOU<span>#${shortId(item.realId)}</span></div>`;
+    const sideAvatar = `<div class="side-avatar">${avatarInnerHTML()}</div>`;
     const attribution = `<span class="attribution">${UPLOAD_TAG_ICON}<span>Uploaded ${timeAgo(item.timestamp)}</span></span>`;
     el.innerHTML = `
-      <video src="${item.src}" loop muted playsinline preload="metadata"></video>
+      <video src="${item.src}" loop playsinline preload="metadata"></video>
       <div class="vignette"></div>
       <div class="progress-track"><div class="progress-fill"></div></div>
       <div class="pause-flash">${PLAY_ICON}</div>
       <div class="like-burst">${HEART_FILL}</div>
       <div class="side-actions">
-        ${idPill}
+        ${sideAvatar}
         <button class="action like-btn ${eng.liked?'liked':''}">${eng.liked?HEART_FILL:HEART_OUTLINE}<span class="count like-count">${fmt(eng.likes)}</span></button>
         <button class="action comment-btn">${COMMENT_ICON}<span class="count comment-count">${fmt(eng.comments.length)}</span></button>
         <button class="action share-btn">${SHARE_ICON}<span class="count share-count">${fmt(eng.shares)}</span></button>
       </div>
       <div class="bottom-info">
+        <div class="name-row"><div class="name-avatar">${avatarInnerHTML()}</div><span class="name-text">${profile.name}</span></div>
         <p class="title-line">${item.title}</p>
         ${attribution}
       </div>
     `;
+    const vidEl = el.querySelector('video');
+    vidEl.muted = !soundOn;
     return el;
   }
 
@@ -493,6 +567,7 @@
   // ---------- COMMENTS ----------
   const commentSheet = document.getElementById('commentSheet');
   const shareSheet = document.getElementById('shareSheet');
+  const editProfileSheet = document.getElementById('editProfileSheet');
   const backdrop = document.getElementById('sheetBackdrop');
   const commentList = document.getElementById('commentList');
   const commentCountTitle = document.getElementById('commentCountTitle');
@@ -500,7 +575,7 @@
   let activeCard = null;
 
   function openSheet(s){ backdrop.classList.add('show'); s.classList.add('show'); }
-  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); }
+  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); }
   backdrop.addEventListener('click', closeSheets);
 
   function openComments(card){
@@ -558,8 +633,9 @@
         if(navigator.clipboard) navigator.clipboard.writeText(url).then(()=>toast('Link copied to clipboard'));
         else toast('Link copied');
       } else if(kind==='info'){
-        const badge = activeCard.querySelector('.id-badge');
-        toast(badge ? 'Real upload ID ' + badge.textContent : 'Upload info');
+        const realId = activeCard.dataset.realId;
+        const attrText = activeCard.querySelector('.attribution span') ? activeCard.querySelector('.attribution span').textContent : '';
+        toast('ID #' + shortId(realId) + (attrText ? ' · ' + attrText : ''));
       } else if(kind==='save'){ toast('Video saved'); }
       else if(kind==='report'){ toast('Thanks — report submitted'); }
       else { toast('Shared'); }
@@ -591,6 +667,55 @@
     appendCards(likedItems);
   }
 
+  // ---------- PROFILE EDITING (name + real picture, saved on this device) ----------
+  const editAvatarPreview = document.getElementById('editAvatarPreview');
+  const avatarFileInput = document.getElementById('avatarFileInput');
+  const editNameInput = document.getElementById('editNameInput');
+  let pendingAvatarDataUrl = null;
+
+  function openProfileEditor(){
+    pendingAvatarDataUrl = null;
+    editNameInput.value = profile.name;
+    editAvatarPreview.innerHTML = avatarInnerHTML();
+    openSheet(editProfileSheet);
+  }
+  document.getElementById('editProfileBtn').addEventListener('click', openProfileEditor);
+  document.getElementById('profileAvatar').addEventListener('click', openProfileEditor);
+  document.getElementById('changePhotoBtn').addEventListener('click', ()=> avatarFileInput.click());
+  editAvatarPreview.addEventListener('click', ()=> avatarFileInput.click());
+
+  avatarFileInput.addEventListener('change', ()=>{
+    const file = avatarFileInput.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        // downscale to keep it small enough for localStorage
+        const size = 240;
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const scale = Math.max(size/img.width, size/img.height);
+        const w = img.width*scale, h = img.height*scale;
+        ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
+        pendingAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        editAvatarPreview.innerHTML = `<img src="${pendingAvatarDataUrl}" alt="">`;
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('saveProfileBtn').addEventListener('click', ()=>{
+    const name = editNameInput.value.trim();
+    if(name) profile.name = name;
+    if(pendingAvatarDataUrl) profile.avatar = pendingAvatarDataUrl;
+    saveProfile();
+    refreshAllAvatars();
+    closeSheets();
+    toast('Profile updated');
+  });
+
   // ---------- BOTTOM NAV / SCREENS ----------
   const navItems = document.querySelectorAll('.nav-item');
   const screens = { discover: document.getElementById('screen-discover'), inbox: document.getElementById('screen-inbox'), profile: document.getElementById('screen-profile'), upload: document.getElementById('screen-upload') };
@@ -601,6 +726,7 @@
       Object.values(screens).forEach(s=>s.classList.remove('show'));
       feedEl.style.display = target==='feed' ? 'block' : 'none';
       document.querySelector('.top-tabs').style.display = target==='feed' ? 'flex' : 'none';
+      document.getElementById('soundToggle').style.display = target==='feed' ? 'flex' : 'none';
       if(target!=='feed') screens[target].classList.add('show');
       if(target==='discover') buildDiscoverGrid();
       if(target==='profile') { renderProfileStats(); buildProfileGrid(); }
@@ -703,7 +829,7 @@
     navItems.forEach(n=>n.classList.remove('active'));
     document.querySelector('.nav-item[data-screen="feed"]').classList.add('active');
     Object.values(screens).forEach(s=>s.classList.remove('show'));
-    feedEl.style.display='block'; document.querySelector('.top-tabs').style.display='flex';
+    feedEl.style.display='block'; document.querySelector('.top-tabs').style.display='flex'; document.getElementById('soundToggle').style.display='flex';
     feedEl.scrollTop = 0;
     pushActivity('upload', caption);
     renderProfileStats();
