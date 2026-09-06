@@ -116,6 +116,44 @@
 
   .empty-state{padding:40px 30px; text-align:center; color:var(--text-faint); font-size:13.5px; line-height:1.5;}
 
+  .search-bar-wrap{padding:10px 16px 4px;}
+  .search-bar{background:var(--surface); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:8px;}
+  .search-bar svg{width:17px; height:17px; color:var(--text-faint); flex-shrink:0;}
+  .search-bar input{flex:1; background:none; border:none; color:#fff; font-size:14px; font-family:inherit;}
+  .search-bar input::placeholder{color:var(--text-faint);}
+
+  .back-row{position:absolute; top:0; left:0; right:0; padding:calc(14px + var(--safe-top)) 16px 12px; background:var(--bg); z-index:2; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; gap:12px;}
+  .back-btn{background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;}
+  .back-title{font-size:17px; font-weight:700;}
+
+  .new-chat-row{display:flex; gap:10px; align-items:center; padding:12px 16px 4px;}
+  .new-chat-row input{flex:1; background:var(--surface); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
+  .new-chat-row input::placeholder{color:var(--text-faint);}
+
+  .chat-row{display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.05);}
+  .chat-row .cinit{width:46px; height:46px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; flex-shrink:0;}
+  .chat-row .cinfo{flex:1; min-width:0;}
+  .chat-row .cname{font-size:14.5px; font-weight:700;}
+  .chat-row .cpreview{font-size:12.5px; color:var(--text-faint); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chat-row .ctime{font-size:11px; color:var(--text-faint); flex-shrink:0;}
+
+  .chat-messages{position:absolute; top:calc(54px + var(--safe-top)); bottom:64px; left:0; right:0; overflow-y:auto; padding:14px 16px;}
+  .chat-bubble-row{display:flex; justify-content:flex-end; margin-bottom:10px;}
+  .chat-bubble{max-width:72%; background:var(--accent); color:#fff; padding:9px 13px; border-radius:16px 16px 4px 16px; font-size:14px; line-height:1.4;}
+  .chat-reel-bubble{max-width:60%; background:var(--surface); border-radius:14px 14px 4px 14px; overflow:hidden;}
+  .chat-reel-bubble video{width:100%; max-height:220px; display:block; background:#000; object-fit:cover;}
+  .chat-reel-caption{padding:8px 10px; font-size:12.5px; color:var(--text-dim);}
+  .chat-time{font-size:10.5px; color:var(--text-faint); text-align:right; margin-top:3px; margin-right:2px;}
+  .chat-input-row{position:absolute; left:0; right:0; bottom:0; display:flex; gap:10px; align-items:center; padding:10px 14px; padding-bottom:calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.07); background:var(--bg);}
+  .chat-input-row input{flex:1; background:var(--surface-2); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
+  .chat-input-row input::placeholder{color:var(--text-faint);}
+  .chat-attach-btn{background:none; border:none; color:#fff; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .chat-attach-btn svg{width:22px; height:22px;}
+
+  .reel-picker-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 16px calc(16px + var(--safe-bottom)); overflow-y:auto;}
+  .reel-picker-tile{position:relative; aspect-ratio:9/13; border-radius:10px; overflow:hidden; background:#000; cursor:pointer;}
+  .reel-picker-tile video{width:100%; height:100%; object-fit:cover;}
+
   .pull-refresh{position:absolute; top:calc(14px + var(--safe-top)); left:50%; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; z-index:38; transform:translate(-50%,-60px); transition:transform .15s ease-out; pointer-events:none;}
   .pull-refresh.ready{background:var(--accent);}
   .pull-spinner{width:16px; height:16px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%;}
@@ -190,14 +228,38 @@
   <div class="pull-refresh" id="pullRefresh"><div class="pull-spinner"></div></div>
   <div class="feed" id="feed"></div>
 
-  <div class="screen" id="screen-discover">
-    <div class="screen-header">Discover</div>
+  <div class="screen" id="screen-discover" style="padding-top:calc(14px + var(--safe-top));">
+    <div class="search-bar-wrap">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="discoverSearchInput" placeholder="Search your videos">
+      </div>
+    </div>
     <div class="grid3" id="discoverGrid"></div>
   </div>
 
-  <div class="screen" id="screen-inbox">
-    <div class="screen-header">Activity</div>
-    <div id="activityList"></div>
+  <div class="screen" id="screen-messages">
+    <div class="screen-header">Messages</div>
+    <div class="new-chat-row">
+      <input type="text" id="newChatInput" placeholder="Start a chat with a name...">
+      <button class="send-btn" id="newChatBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
+    </div>
+    <div id="chatList"></div>
+  </div>
+
+  <div class="screen" id="screen-chat" style="padding-top:0;">
+    <div class="back-row">
+      <button class="back-btn" id="chatBackBtn">‹</button>
+      <div class="back-title" id="chatContactName">Name</div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <button class="chat-attach-btn" id="chatAttachBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="14" height="13" rx="2"/><path d="M16.5 10.5l5-3v9l-5-3" stroke-linejoin="round"/></svg>
+      </button>
+      <input type="text" id="chatTextInput" placeholder="Message...">
+      <button class="send-btn" id="chatSendBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M4 20l16-8L4 4v6l10 2-10 2v6z" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
+    </div>
   </div>
 
   <div class="screen" id="screen-profile">
@@ -239,15 +301,15 @@
       <span class="nav-label">Home</span>
     </div>
     <div class="nav-item" data-screen="discover">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15 9l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-      <span class="nav-label">Discover</span>
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="nav-label">Search</span>
     </div>
     <div class="nav-item" data-screen="upload">
       <div class="nav-upload"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></div>
     </div>
-    <div class="nav-item" data-screen="inbox">
+    <div class="nav-item" data-screen="messages">
       <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-      <span class="nav-label">Activity</span>
+      <span class="nav-label">Messages</span>
     </div>
     <div class="nav-item" data-screen="profile">
       <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.6" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -304,6 +366,12 @@
     </div>
   </div>
 
+  <div class="sheet" id="reelPickerSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Send a reel</div>
+    <div class="reel-picker-grid" id="reelPickerGrid"></div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -355,7 +423,6 @@
 
   // ---------- PERSISTENCE ----------
   const ENGAGEMENT_KEY = 'snapclip_engagement_v2';
-  const ACTIVITY_KEY = 'snapclip_activity_v1';
 
   function loadEngagementStore(){
     try{ return JSON.parse(localStorage.getItem(ENGAGEMENT_KEY)) || {}; }catch(e){ return {}; }
@@ -370,14 +437,6 @@
     return engagementStore[realId];
   }
 
-  function loadActivity(){ try{ return JSON.parse(localStorage.getItem(ACTIVITY_KEY)) || []; }catch(e){ return []; } }
-  let activityLog = loadActivity();
-  function pushActivity(type, title){
-    activityLog.unshift({type, title, ts:Date.now()});
-    activityLog = activityLog.slice(0,40);
-    try{ localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activityLog)); }catch(e){}
-    renderActivity();
-  }
   function timeAgo(ts){
     const s = Math.floor((Date.now()-ts)/1000);
     if(s<60) return 'just now';
@@ -613,7 +672,6 @@
       btn.classList.add('heart-pop'); setTimeout(()=>btn.classList.remove('heart-pop'),380);
     });
     persist(realId);
-    if(eng.liked) pushActivity('like', card.querySelector('.title-line').textContent);
     renderProfileStats();
   }
 
@@ -636,7 +694,7 @@
   let activeCard = null;
 
   function openSheet(s){ backdrop.classList.add('show'); s.classList.add('show'); }
-  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); document.getElementById('peopleSheet').classList.remove('show'); }
+  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); document.getElementById('peopleSheet').classList.remove('show'); document.getElementById('reelPickerSheet').classList.remove('show'); }
   backdrop.addEventListener('click', closeSheets);
 
   function openComments(card){
@@ -668,7 +726,6 @@
     const realId = activeCard.dataset.realId;
     document.querySelectorAll(`.video-card[data-real-id="${realId}"] .comment-count`).forEach(el=> el.textContent = fmt(eng.comments.length));
     persist(realId);
-    pushActivity('comment', activeCard.querySelector('.title-line').textContent);
     renderProfileStats();
   }
   document.getElementById('sendComment').addEventListener('click', submitComment);
@@ -831,30 +888,37 @@
 
   // ---------- BOTTOM NAV / SCREENS ----------
   const navItems = document.querySelectorAll('.nav-item');
-  const screens = { discover: document.getElementById('screen-discover'), inbox: document.getElementById('screen-inbox'), profile: document.getElementById('screen-profile'), upload: document.getElementById('screen-upload') };
+  const screens = { discover: document.getElementById('screen-discover'), messages: document.getElementById('screen-messages'), profile: document.getElementById('screen-profile'), upload: document.getElementById('screen-upload') };
   navItems.forEach(item=>{
     item.addEventListener('click', ()=>{
       navItems.forEach(n=>n.classList.remove('active')); item.classList.add('active');
       const target = item.dataset.screen;
       Object.values(screens).forEach(s=>s.classList.remove('show'));
+      document.getElementById('screen-chat').classList.remove('show');
       feedEl.style.display = target==='feed' ? 'block' : 'none';
       document.querySelector('.top-tabs').style.display = target==='feed' ? 'flex' : 'none';
       if(target!=='feed') screens[target].classList.add('show');
       if(target==='discover') buildDiscoverGrid();
       if(target==='profile') { renderProfileStats(); buildProfileGrid(); }
-      if(target==='inbox') renderActivity();
+      if(target==='messages') renderChatList();
     });
   });
 
-  // ---------- DISCOVER (grid of your own real uploaded videos) ----------
-  function buildDiscoverGrid(){
+  // ---------- DISCOVER (search + grid of your own real uploaded videos) ----------
+  function buildDiscoverGrid(filterText){
+    filterText = (filterText||'').trim().toLowerCase();
     const grid = document.getElementById('discoverGrid');
     grid.innerHTML='';
+    const matches = filterText ? uploadRecords.filter(r=> r.caption.toLowerCase().includes(filterText)) : uploadRecords;
     if(uploadRecords.length===0){
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No videos yet — upload your first real video to see it here.</div>`;
       return;
     }
-    uploadRecords.forEach(r=>{
+    if(matches.length===0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No videos match "${filterText}".</div>`;
+      return;
+    }
+    matches.forEach(r=>{
       const url = URL.createObjectURL(r.blob);
       const tile = document.createElement('div');
       tile.className='tile';
@@ -862,6 +926,7 @@
       grid.appendChild(tile);
     });
   }
+  document.getElementById('discoverSearchInput').addEventListener('input', (e)=> buildDiscoverGrid(e.target.value));
 
   // ---------- PROFILE (real derived stats + your real uploads) ----------
   function renderProfileStats(){
@@ -894,19 +959,128 @@
     });
   }
 
-  // ---------- ACTIVITY (real log of your own likes/comments/uploads) ----------
-  function renderActivity(){
-    const list = document.getElementById('activityList');
-    if(activityLog.length===0){
-      list.innerHTML = `<div class="empty-state">Your likes, comments and uploads will show up here as real activity — nothing fake.</div>`;
+  // ---------- MESSAGES (real, self-managed conversations — you can send a text or one of your own reels) ----------
+  const MESSAGES_KEY = 'snapclip_messages_v1';
+  function loadMessages(){ try{ return JSON.parse(localStorage.getItem(MESSAGES_KEY)) || {}; }catch(e){ return {}; } }
+  let messagesStore = loadMessages();
+  function saveMessages(){ try{ localStorage.setItem(MESSAGES_KEY, JSON.stringify(messagesStore)); }catch(e){} }
+
+  function getContacts(){
+    const set = new Set([...social.following, ...social.followers, ...Object.keys(messagesStore)]);
+    return Array.from(set);
+  }
+  function lastMessageOf(name){
+    const arr = messagesStore[name] || [];
+    return arr.length ? arr[arr.length-1] : null;
+  }
+  function renderChatList(){
+    const list = document.getElementById('chatList');
+    const contacts = getContacts();
+    if(contacts.length===0){
+      list.innerHTML = `<div class="empty-state">No chats yet — add someone in Followers/Following, or start a new chat above.</div>`;
       return;
     }
-    list.innerHTML = activityLog.map(a=>{
-      const icon = a.type==='like'?LIKE_ACT_ICON : a.type==='comment'?COMMENT_ACT_ICON : UPLOAD_ACT_ICON;
-      const text = a.type==='upload' ? `You uploaded "${a.title}"` : `${a.type==='like'?'You liked':'You commented on'} "${a.title}"`;
-      return `<div class="activity-item"><div class="aic">${icon}</div><div><div class="atxt">${text}</div><div class="atime">${timeAgo(a.ts)}</div></div></div>`;
+    list.innerHTML = contacts.map(name=>{
+      const last = lastMessageOf(name);
+      const preview = !last ? 'Say hello 👋' : last.type==='reel' ? '🎬 Sent a reel' : last.text;
+      const time = last ? timeAgo(last.ts) : '';
+      return `<div class="chat-row" data-name="${name}">
+        <div class="cinit">${name.trim().charAt(0).toUpperCase()}</div>
+        <div class="cinfo"><div class="cname">${name}</div><div class="cpreview">${preview}</div></div>
+        <div class="ctime">${time}</div>
+      </div>`;
     }).join('');
+    list.querySelectorAll('.chat-row').forEach(row=>{
+      row.addEventListener('click', ()=> openChat(row.dataset.name));
+    });
   }
+
+  let activeChatName = null;
+  function openChat(name){
+    activeChatName = name;
+    document.getElementById('chatContactName').textContent = name;
+    document.getElementById('screen-messages').classList.remove('show');
+    document.getElementById('screen-chat').classList.add('show');
+    renderChatMessages();
+  }
+  function closeChat(){
+    document.getElementById('screen-chat').classList.remove('show');
+    document.getElementById('screen-messages').classList.add('show');
+    renderChatList();
+  }
+  function renderChatMessages(){
+    const box = document.getElementById('chatMessages');
+    const arr = messagesStore[activeChatName] || [];
+    if(arr.length===0){
+      box.innerHTML = `<div class="empty-state">No messages yet with ${activeChatName}. Say hello or send one of your reels.</div>`;
+    } else {
+      box.innerHTML = arr.map(m=>{
+        if(m.type==='reel'){
+          const rec = uploadRecords.find(r=>r.id===m.videoId);
+          const url = rec ? URL.createObjectURL(rec.blob) : '';
+          return `<div class="chat-bubble-row"><div>
+            <div class="chat-reel-bubble">${url ? `<video src="${url}" muted loop preload="metadata"></video>` : ''}<div class="chat-reel-caption">${m.caption||''}</div></div>
+            <div class="chat-time">${timeAgo(m.ts)}</div>
+          </div></div>`;
+        }
+        return `<div class="chat-bubble-row"><div><div class="chat-bubble">${m.text}</div><div class="chat-time">${timeAgo(m.ts)}</div></div></div>`;
+      }).join('');
+    }
+    box.scrollTop = box.scrollHeight;
+    box.querySelectorAll('.chat-reel-bubble video').forEach(v=>{
+      v.addEventListener('click', ()=>{ if(v.paused){ v.play().catch(()=>{}); } else { v.pause(); } });
+    });
+  }
+  function sendText(){
+    const input = document.getElementById('chatTextInput');
+    const text = input.value.trim();
+    if(!text || !activeChatName) return;
+    messagesStore[activeChatName] = messagesStore[activeChatName] || [];
+    messagesStore[activeChatName].push({type:'text', text, ts:Date.now()});
+    saveMessages();
+    input.value='';
+    renderChatMessages();
+  }
+  function sendReel(videoId){
+    if(!activeChatName) return;
+    const rec = uploadRecords.find(r=>r.id===videoId);
+    if(!rec) return;
+    messagesStore[activeChatName] = messagesStore[activeChatName] || [];
+    messagesStore[activeChatName].push({type:'reel', videoId, caption:rec.caption, ts:Date.now()});
+    saveMessages();
+    closeSheets();
+    renderChatMessages();
+  }
+  document.getElementById('chatSendBtn').addEventListener('click', sendText);
+  document.getElementById('chatTextInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendText(); });
+  document.getElementById('chatBackBtn').addEventListener('click', closeChat);
+  document.getElementById('newChatBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('newChatInput');
+    const name = input.value.trim();
+    if(!name) return;
+    messagesStore[name] = messagesStore[name] || [];
+    saveMessages();
+    input.value='';
+    openChat(name);
+  });
+  document.getElementById('newChatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('newChatBtn').click(); });
+
+  document.getElementById('chatAttachBtn').addEventListener('click', ()=>{
+    const grid = document.getElementById('reelPickerGrid');
+    if(uploadRecords.length===0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Upload a video first to be able to send it as a reel.</div>`;
+    } else {
+      grid.innerHTML='';
+      uploadRecords.forEach(r=>{
+        const url = URL.createObjectURL(r.blob);
+        const tile = document.createElement('div'); tile.className='reel-picker-tile';
+        tile.innerHTML = `<video src="${url}" muted preload="metadata"></video>`;
+        tile.addEventListener('click', ()=> sendReel(r.id));
+        grid.appendChild(tile);
+      });
+    }
+    openSheet(document.getElementById('reelPickerSheet'));
+  });
 
   // ---------- TOAST ----------
   const toastEl = document.getElementById('toast');
@@ -948,7 +1122,6 @@
     Object.values(screens).forEach(s=>s.classList.remove('show'));
     feedEl.style.display='block'; document.querySelector('.top-tabs').style.display='flex';
     feedEl.scrollTop = 0;
-    pushActivity('upload', caption);
     renderProfileStats();
     toast('Posted — this real video is saved on this device 🎉');
   });
