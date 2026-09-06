@@ -73,10 +73,7 @@
   .attribution{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-faint); font-weight:500; text-decoration:none;}
   .attribution svg{width:14px; height:14px; flex-shrink:0;}
 
-  /* ---------- SOUND TOGGLE ---------- */
-  .sound-toggle{position:absolute; top:calc(14px + var(--safe-top)); right:16px; z-index:41; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; cursor:pointer;}
-  .sound-toggle svg{width:17px; height:17px;}
-
+  /* ---------- (sound icon removed — videos try to play with sound automatically) ---------- */
 
   /* ---------- BOTTOM NAV ---------- */
   .bottom-nav{position:absolute; left:0; right:0; bottom:0; height:calc(58px + var(--safe-bottom)); padding-bottom:var(--safe-bottom); background:rgba(8,8,10,.92); backdrop-filter:blur(10px); display:flex; align-items:center; z-index:50; border-top:1px solid rgba(255,255,255,.06);}
@@ -111,10 +108,20 @@
   .edit-save-btn{width:100%; margin-top:16px; padding:12px; border-radius:10px; border:none; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; font-weight:700; font-size:14.5px;}
   .stats-row{display:flex; gap:28px; margin-top:16px;}
   .stats-row div{text-align:center;}
+  .stat-click{cursor:pointer;}
   .stat-num{font-size:16.5px; font-weight:700;}
   .stat-label{font-size:12px; color:var(--text-faint); margin-top:2px;}
 
   .empty-state{padding:40px 30px; text-align:center; color:var(--text-faint); font-size:13.5px; line-height:1.5;}
+
+  .people-list{overflow-y:auto; padding:6px 16px; flex:1;}
+  .people-row{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05);}
+  .people-row .pinit{width:36px; height:36px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;}
+  .people-row .pname2{flex:1; font-size:14px; font-weight:600;}
+  .people-row .premove{background:none; border:1px solid rgba(255,255,255,.15); color:var(--text-faint); font-size:12px; padding:6px 12px; border-radius:8px; cursor:pointer;}
+  .people-add-row{display:flex; gap:10px; align-items:center; padding:10px 14px; padding-bottom:calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.07);}
+  .people-add-row input{flex:1; background:var(--surface-2); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
+  .people-add-row input::placeholder{color:var(--text-faint);}
 
   .activity-item{display:flex; gap:12px; padding:13px 16px; align-items:flex-start; border-bottom:1px solid rgba(255,255,255,.05);}
   .activity-item .aic{width:36px; height:36px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
@@ -143,7 +150,9 @@
   .sheet-title{text-align:center; font-size:14.5px; font-weight:700; padding:6px 0 10px; border-bottom:1px solid rgba(255,255,255,.07);}
   .comment-list{overflow-y:auto; padding:6px 16px; flex:1;}
   .comment-row{display:flex; gap:10px; padding:10px 0;}
-  .comment-row .cavatar{width:32px; height:32px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0;}
+  .cavatar{border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; overflow:hidden; color:#fff;}
+  .cavatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .comment-row .cavatar{width:32px; height:32px; font-size:13px;}
   .comment-row .cuser{font-size:12.5px; font-weight:700; color:var(--text-faint); margin-bottom:2px;}
   .comment-row .ctext{font-size:14px; line-height:1.4;}
   .comment-input-row{display:flex; gap:10px; align-items:center; padding:10px 14px; padding-bottom:calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.07);}
@@ -168,7 +177,6 @@
     <span data-tab="following">Following</span>
     <span class="active" data-tab="foryou">For You</span>
   </div>
-  <div class="sound-toggle" id="soundToggle"></div>
 
   <div class="feed" id="feed"></div>
 
@@ -190,9 +198,9 @@
       <div class="phandle">this device's activity</div>
       <button class="edit-profile-btn" id="editProfileBtn">Edit profile</button>
       <div class="stats-row">
-        <div><div class="stat-num" id="statLiked">0</div><div class="stat-label">Liked</div></div>
-        <div><div class="stat-num" id="statComments">0</div><div class="stat-label">Comments</div></div>
-        <div><div class="stat-num" id="statUploads">0</div><div class="stat-label">Uploads</div></div>
+        <div><div class="stat-num" id="statPosts">0</div><div class="stat-label">Posts</div></div>
+        <div class="stat-click" data-list="followers"><div class="stat-num" id="statFollowers">0</div><div class="stat-label">Followers</div></div>
+        <div class="stat-click" data-list="following"><div class="stat-num" id="statFollowing">0</div><div class="stat-label">Following</div></div>
       </div>
     </div>
     <div class="grid3" id="profileGrid"></div>
@@ -244,7 +252,7 @@
     <div class="sheet-title" id="commentCountTitle">Comments</div>
     <div class="comment-list" id="commentList"></div>
     <div class="comment-input-row">
-      <div class="cavatar" style="width:30px;height:30px;font-size:12px;">🙂</div>
+      <div class="cavatar" id="commentInputAvatar" style="width:30px;height:30px;font-size:12px;">🙂</div>
       <input type="text" id="commentInput" placeholder="Add a comment...">
       <button class="send-btn" id="sendComment"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M4 20l16-8L4 4v6l10 2-10 2v6z" stroke-linejoin="round" stroke-linecap="round"/></svg></button>
     </div>
@@ -276,6 +284,16 @@
     </div>
   </div>
 
+  <div class="sheet" id="peopleSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="peopleSheetTitle">Following</div>
+    <div class="people-list" id="peopleList"></div>
+    <div class="people-add-row">
+      <input type="text" id="peopleInput" placeholder="Add a name...">
+      <button class="send-btn" id="peopleAddBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -292,8 +310,6 @@
   const LIKE_ACT_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 20.5s-7-4.6-9.6-9.1C.8 8.2 2 4.7 5.2 3.7c2-.6 4 .1 5.3 1.8l1.5 2 1.5-2c1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.4 4.5 2.8 7.7C19 15.9 12 20.5 12 20.5z"/></svg>';
   const COMMENT_ACT_ICON = COMMENT_ICON.replace('#fff','currentColor');
   const UPLOAD_ACT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M12 16V4m0 0l-4 4m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke-linecap="round"/></svg>';
-  const SOUND_ON_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8.5a5 5 0 010 7" stroke-linecap="round"/><path d="M19.5 6a8.5 8.5 0 010 12" stroke-linecap="round"/></svg>';
-  const SOUND_OFF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke-linecap="round"/></svg>';
 
   // ---------- PROFILE (name + picture, editable, saved on this device) ----------
   const PROFILE_KEY = 'snapclip_profile_v1';
@@ -304,14 +320,21 @@
     return profile.avatar ? `<img src="${profile.avatar}" alt="">` : `<span class="initial">${(profile.name||'Y').trim().charAt(0).toUpperCase()}</span>`;
   }
   function refreshAllAvatars(){
-    document.querySelectorAll('.side-avatar').forEach(el=> el.innerHTML = avatarInnerHTML());
     document.querySelectorAll('.name-avatar').forEach(el=> el.innerHTML = avatarInnerHTML());
     document.querySelectorAll('.name-text').forEach(el=> el.textContent = profile.name);
+    const commentInputAvatar = document.getElementById('commentInputAvatar');
+    if(commentInputAvatar) commentInputAvatar.innerHTML = avatarInnerHTML();
     const profileAvatarEl = document.getElementById('profileAvatar');
     if(profileAvatarEl) profileAvatarEl.innerHTML = avatarInnerHTML();
     const profileNameEl = document.getElementById('profileNameDisplay');
     if(profileNameEl) profileNameEl.textContent = profile.name;
   }
+
+  // ---------- SOCIAL (Followers/Following — real, self-managed lists saved on this device) ----------
+  const SOCIAL_KEY = 'snapclip_social_v1';
+  function loadSocial(){ try{ return JSON.parse(localStorage.getItem(SOCIAL_KEY)) || {following:[], followers:[]}; }catch(e){ return {following:[], followers:[]}; } }
+  let social = loadSocial();
+  function saveSocial(){ try{ localStorage.setItem(SOCIAL_KEY, JSON.stringify(social)); }catch(e){} }
 
   function seededNum(seedStr, base, spread){
     let h=0; for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i))>>>0; }
@@ -399,21 +422,8 @@
     return shuffledPool().map(r=>({ id:r.id+'__b'+batchN, realId:r.id, title:r.caption, src:URL.createObjectURL(r.blob), timestamp:r.timestamp }));
   }
 
-  // ---------- SOUND ----------
-  const SOUND_KEY = 'snapclip_sound_v1';
-  let soundOn = localStorage.getItem(SOUND_KEY) === '1';
-  let soundHintShown = false;
-  const soundToggleEl = document.getElementById('soundToggle');
-  function renderSoundIcon(){ soundToggleEl.innerHTML = soundOn ? SOUND_ON_ICON : SOUND_OFF_ICON; }
-  renderSoundIcon();
-  soundToggleEl.addEventListener('click', ()=>{
-    soundOn = !soundOn;
-    localStorage.setItem(SOUND_KEY, soundOn ? '1' : '0');
-    renderSoundIcon();
-    document.querySelectorAll('#feed video').forEach(v=>{ v.muted = !soundOn; });
-    if(currentVideoEl) currentVideoEl.play().catch(()=>{});
-    toast(soundOn ? 'Sound on' : 'Sound off');
-  });
+  // ---------- SOUND (always tries to play with sound; falls back to muted only if the browser blocks it) ----------
+  let soundOn = true;
 
   let io = null;
   let currentVideoEl = null;
@@ -427,10 +437,9 @@
           currentVideoEl = vid;
           vid.muted = !soundOn;
           vid.play().catch(()=>{
-            // Autoplay with sound was blocked — fall back to muted playback until the user taps the sound icon
+            // Autoplay with sound was blocked by the browser — fall back to muted playback
             vid.muted = true;
             vid.play().catch(()=>{});
-            if(soundOn && !soundHintShown){ soundHintShown = true; toast('Tap the 🔊 icon to enable sound'); }
           });
         } else { vid.pause(); }
       });
@@ -446,7 +455,6 @@
     el.className='video-card';
     el.dataset.instance = item.id;
     el.dataset.realId = item.realId;
-    const sideAvatar = `<div class="side-avatar">${avatarInnerHTML()}</div>`;
     const attribution = `<span class="attribution">${UPLOAD_TAG_ICON}<span>Uploaded ${timeAgo(item.timestamp)}</span></span>`;
     el.innerHTML = `
       <video src="${item.src}" loop playsinline preload="metadata"></video>
@@ -455,10 +463,9 @@
       <div class="pause-flash">${PLAY_ICON}</div>
       <div class="like-burst">${HEART_FILL}</div>
       <div class="side-actions">
-        ${sideAvatar}
         <button class="action like-btn ${eng.liked?'liked':''}">${eng.liked?HEART_FILL:HEART_OUTLINE}<span class="count like-count">${fmt(eng.likes)}</span></button>
-        <button class="action comment-btn">${COMMENT_ICON}<span class="count comment-count">${fmt(eng.comments.length)}</span></button>
         <button class="action share-btn">${SHARE_ICON}<span class="count share-count">${fmt(eng.shares)}</span></button>
+        <button class="action comment-btn">${COMMENT_ICON}<span class="count comment-count">${fmt(eng.comments.length)}</span></button>
       </div>
       <div class="bottom-info">
         <div class="name-row"><div class="name-avatar">${avatarInnerHTML()}</div><span class="name-text">${profile.name}</span></div>
@@ -575,7 +582,7 @@
   let activeCard = null;
 
   function openSheet(s){ backdrop.classList.add('show'); s.classList.add('show'); }
-  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); }
+  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); document.getElementById('peopleSheet').classList.remove('show'); }
   backdrop.addEventListener('click', closeSheets);
 
   function openComments(card){
@@ -592,7 +599,7 @@
     }
     commentList.innerHTML = eng.comments.map(c=>`
       <div class="comment-row">
-        <div class="cavatar">🙂</div>
+        <div class="cavatar">${avatarInnerHTML()}</div>
         <div><div class="cuser">${c.user}</div><div class="ctext">${c.text}</div></div>
       </div>`).join('');
     commentList.scrollTop = 0;
@@ -601,7 +608,7 @@
     const text = commentInput.value.trim();
     if(!text || !activeCard) return;
     const eng = getCardData(activeCard);
-    eng.comments.unshift({user:'you.creates', text});
+    eng.comments.unshift({user:profile.name, text});
     commentInput.value='';
     renderComments();
     const realId = activeCard.dataset.realId;
@@ -716,6 +723,50 @@
     toast('Profile updated');
   });
 
+  // ---------- FOLLOWERS / FOLLOWING (real, self-managed lists) ----------
+  const peopleSheet = document.getElementById('peopleSheet');
+  const peopleSheetTitle = document.getElementById('peopleSheetTitle');
+  const peopleList = document.getElementById('peopleList');
+  const peopleInput = document.getElementById('peopleInput');
+  let activeListKey = 'following';
+
+  function renderPeopleList(){
+    const arr = social[activeListKey];
+    peopleSheetTitle.textContent = activeListKey==='following' ? 'Following' : 'Followers';
+    if(arr.length===0){
+      peopleList.innerHTML = `<div class="empty-state">No one here yet — add a name below.</div>`;
+      return;
+    }
+    peopleList.innerHTML = arr.map((n,i)=>`
+      <div class="people-row">
+        <div class="pinit">${n.trim().charAt(0).toUpperCase()}</div>
+        <div class="pname2">${n}</div>
+        <button class="premove" data-i="${i}">Remove</button>
+      </div>`).join('');
+    peopleList.querySelectorAll('.premove').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        social[activeListKey].splice(Number(btn.dataset.i),1);
+        saveSocial(); renderPeopleList(); renderProfileStats();
+      });
+    });
+  }
+  document.querySelectorAll('.stat-click').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      activeListKey = el.dataset.list;
+      renderPeopleList();
+      openSheet(peopleSheet);
+    });
+  });
+  function addPerson(){
+    const name = peopleInput.value.trim();
+    if(!name) return;
+    social[activeListKey].push(name);
+    peopleInput.value='';
+    saveSocial(); renderPeopleList(); renderProfileStats();
+  }
+  document.getElementById('peopleAddBtn').addEventListener('click', addPerson);
+  peopleInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addPerson(); });
+
   // ---------- BOTTOM NAV / SCREENS ----------
   const navItems = document.querySelectorAll('.nav-item');
   const screens = { discover: document.getElementById('screen-discover'), inbox: document.getElementById('screen-inbox'), profile: document.getElementById('screen-profile'), upload: document.getElementById('screen-upload') };
@@ -726,7 +777,6 @@
       Object.values(screens).forEach(s=>s.classList.remove('show'));
       feedEl.style.display = target==='feed' ? 'block' : 'none';
       document.querySelector('.top-tabs').style.display = target==='feed' ? 'flex' : 'none';
-      document.getElementById('soundToggle').style.display = target==='feed' ? 'flex' : 'none';
       if(target!=='feed') screens[target].classList.add('show');
       if(target==='discover') buildDiscoverGrid();
       if(target==='profile') { renderProfileStats(); buildProfileGrid(); }
@@ -753,14 +803,12 @@
 
   // ---------- PROFILE (real derived stats + your real uploads) ----------
   function renderProfileStats(){
-    let liked=0, comments=0;
-    Object.values(engagementStore).forEach(e=>{ if(e.liked) liked++; comments += (e.comments?e.comments.length:0); });
-    const statLiked = document.getElementById('statLiked');
-    const statComments = document.getElementById('statComments');
-    const statUploads = document.getElementById('statUploads');
-    if(statLiked) statLiked.textContent = fmt(liked);
-    if(statComments) statComments.textContent = fmt(comments);
-    if(statUploads) statUploads.textContent = fmt(uploadRecords.length);
+    const statPosts = document.getElementById('statPosts');
+    const statFollowers = document.getElementById('statFollowers');
+    const statFollowing = document.getElementById('statFollowing');
+    if(statPosts) statPosts.textContent = fmt(uploadRecords.length);
+    if(statFollowers) statFollowers.textContent = fmt(social.followers.length);
+    if(statFollowing) statFollowing.textContent = fmt(social.following.length);
   }
   function buildProfileGrid(){
     const grid = document.getElementById('profileGrid');
@@ -829,13 +877,14 @@
     navItems.forEach(n=>n.classList.remove('active'));
     document.querySelector('.nav-item[data-screen="feed"]').classList.add('active');
     Object.values(screens).forEach(s=>s.classList.remove('show'));
-    feedEl.style.display='block'; document.querySelector('.top-tabs').style.display='flex'; document.getElementById('soundToggle').style.display='flex';
+    feedEl.style.display='block'; document.querySelector('.top-tabs').style.display='flex';
     feedEl.scrollTop = 0;
     pushActivity('upload', caption);
     renderProfileStats();
     toast('Posted — this real video is saved on this device 🎉');
   });
 
+  refreshAllAvatars();
   initFeed();
 })();
 </script>
