@@ -40,7 +40,7 @@
   .video-card{position:relative; width:100%; height:100%; scroll-snap-align:start; scroll-snap-stop:always; display:flex; align-items:flex-end; overflow:hidden; background:#000;}
   .video-card video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
   .vignette{position:absolute; inset:0; pointer-events:none; background:linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 100%);}
-  .progress-track{position:absolute; top:0; left:0; right:0; height:2.5px; background:rgba(255,255,255,.18); z-index:20;}
+  .progress-track{position:absolute; bottom:calc(58px + var(--safe-bottom)); left:0; right:0; height:2.5px; background:rgba(255,255,255,.18); z-index:20;}
   .progress-fill{height:100%; width:0%; background:var(--text);}
   .pause-flash{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:15; pointer-events:none; opacity:0;}
   .pause-flash svg{width:74px; height:74px; filter:drop-shadow(0 2px 10px rgba(0,0,0,.5));}
@@ -64,7 +64,7 @@
 
   /* ---------- BOTTOM INFO ---------- */
   .bottom-info{position:absolute; left:14px; right:70px; bottom:100px; z-index:25;}
-  .name-row{display:flex; align-items:center; gap:9px; margin-bottom:9px;}
+  .name-row{display:flex; align-items:center; gap:9px; margin-bottom:9px; cursor:pointer; width:fit-content;}
   .name-avatar{width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid #fff; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .name-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .name-avatar .initial{font-size:14px; font-weight:700; color:#fff;}
@@ -92,6 +92,8 @@
   .tile{position:relative; aspect-ratio:9/13.5; background:linear-gradient(160deg,var(--surface-2),var(--surface)); display:flex; align-items:flex-end; overflow:hidden;}
   .tile video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
   .tile .tile-meta{position:relative; z-index:2; padding:8px; font-size:11px; font-weight:600; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .tile .views-meta{display:flex !important; align-items:center; gap:4px; -webkit-line-clamp:unset;}
+  .tile .views-meta svg{width:13px; height:13px; flex-shrink:0;}
   .tile .tile-shade{position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.75), transparent 55%); z-index:1;}
 
   .profile-head{display:flex; flex-direction:column; align-items:center; padding:10px 16px 18px;}
@@ -114,11 +116,18 @@
 
   .empty-state{padding:40px 30px; text-align:center; color:var(--text-faint); font-size:13.5px; line-height:1.5;}
 
+  .pull-refresh{position:absolute; top:calc(14px + var(--safe-top)); left:50%; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; z-index:38; transform:translate(-50%,-60px); transition:transform .15s ease-out; pointer-events:none;}
+  .pull-refresh.ready{background:var(--accent);}
+  .pull-spinner{width:16px; height:16px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%;}
+  .pull-refresh.spinning .pull-spinner{animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
   .people-list{overflow-y:auto; padding:6px 16px; flex:1;}
   .people-row{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05);}
   .people-row .pinit{width:36px; height:36px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;}
   .people-row .pname2{flex:1; font-size:14px; font-weight:600;}
   .people-row .premove{background:none; border:1px solid rgba(255,255,255,.15); color:var(--text-faint); font-size:12px; padding:6px 12px; border-radius:8px; cursor:pointer;}
+  .people-row .premove.is-following{background:var(--surface-2); border-color:rgba(255,255,255,.2); color:#fff; font-weight:600;}
   .people-add-row{display:flex; gap:10px; align-items:center; padding:10px 14px; padding-bottom:calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.07);}
   .people-add-row input{flex:1; background:var(--surface-2); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
   .people-add-row input::placeholder{color:var(--text-faint);}
@@ -178,6 +187,7 @@
     <span class="active" data-tab="foryou">For You</span>
   </div>
 
+  <div class="pull-refresh" id="pullRefresh"><div class="pull-spinner"></div></div>
   <div class="feed" id="feed"></div>
 
   <div class="screen" id="screen-discover">
@@ -305,6 +315,7 @@
   const SHARE_ICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 12l8-6v3.5c5 .5 7 3 8 7.5-2.4-3-5-4-8-4V17L8 12z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg>';
   const LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 15l6-6M8 12l-2 2a3 3 0 004 4l2-2M16 12l2-2a3 3 0 00-4-4l-2 2" stroke-linecap="round"/></svg>';
   const UPLOAD_TAG_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 9l4-4 4 4M12 5v9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const EYE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
   const PLAY_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7L8 5z"/></svg>';
   const PAUSE_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
   const LIKE_ACT_ICON = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 20.5s-7-4.6-9.6-9.1C.8 8.2 2 4.7 5.2 3.7c2-.6 4 .1 5.3 1.8l1.5 2 1.5-2c1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.4 4.5 2.8 7.7C19 15.9 12 20.5 12 20.5z"/></svg>';
@@ -353,8 +364,9 @@
   function saveEngagementStore(){ try{ localStorage.setItem(ENGAGEMENT_KEY, JSON.stringify(engagementStore)); }catch(e){} }
   function getEngagement(realId){
     if(!engagementStore[realId]){
-      engagementStore[realId] = { likes:0, liked:false, shares:0, comments:[] };
+      engagementStore[realId] = { likes:0, liked:false, shares:0, comments:[], views:0 };
     }
+    if(engagementStore[realId].views===undefined) engagementStore[realId].views = 0;
     return engagementStore[realId];
   }
 
@@ -393,13 +405,13 @@
     let rows=[]; try{ rows = await dbGetAll(); }catch(e){ rows=[]; }
     rows.sort((a,b)=>b.timestamp-a.timestamp);
     uploadRecords = rows;
-    rows.forEach(r=>{ uploadBlobCache[r.id]=r.blob; engagementStore[r.id] = engagementStore[r.id] || {likes:r.likes, liked:r.liked, shares:r.shares, comments:r.comments}; });
+    rows.forEach(r=>{ uploadBlobCache[r.id]=r.blob; engagementStore[r.id] = engagementStore[r.id] || {likes:r.likes, liked:r.liked, shares:r.shares, comments:r.comments, views:r.views||0}; });
     return rows.map(r=>({ id:r.id, realId:r.id, title:r.caption, src:URL.createObjectURL(r.blob), timestamp:r.timestamp }));
   }
   async function persistUpload(realId){
     const eng = getEngagement(realId);
     const existing = uploadRecords.find(r=>r.id===realId);
-    await dbPut({ id:realId, blob:uploadBlobCache[realId], caption:(existing?existing.caption:''), likes:eng.likes, liked:eng.liked, shares:eng.shares, comments:eng.comments, timestamp: Number(realId.split('_').pop())||Date.now() });
+    await dbPut({ id:realId, blob:uploadBlobCache[realId], caption:(existing?existing.caption:''), likes:eng.likes, liked:eng.liked, shares:eng.shares, comments:eng.comments, views:eng.views, timestamp: Number(realId.split('_').pop())||Date.now() });
   }
   function persist(realId){
     if(uploadBlobCache[realId]) persistUpload(realId);
@@ -433,7 +445,16 @@
       entries.forEach(entry=>{
         const vid = entry.target.querySelector('video');
         if(entry.isIntersecting && entry.intersectionRatio>0.6){
-          if(currentVideoEl && currentVideoEl!==vid) currentVideoEl.pause();
+          if(currentVideoEl && currentVideoEl!==vid){
+            currentVideoEl.pause();
+          }
+          if(currentVideoEl!==vid){
+            // This card just became the one on screen — count one real view for it
+            const realId = entry.target.dataset.realId;
+            const eng = getEngagement(realId);
+            eng.views = (eng.views||0) + 1;
+            persist(realId);
+          }
           currentVideoEl = vid;
           vid.muted = !soundOn;
           vid.play().catch(()=>{
@@ -455,7 +476,6 @@
     el.className='video-card';
     el.dataset.instance = item.id;
     el.dataset.realId = item.realId;
-    const attribution = `<span class="attribution">${UPLOAD_TAG_ICON}<span>Uploaded ${timeAgo(item.timestamp)}</span></span>`;
     el.innerHTML = `
       <video src="${item.src}" loop playsinline preload="metadata"></video>
       <div class="vignette"></div>
@@ -468,9 +488,8 @@
         <button class="action comment-btn">${COMMENT_ICON}<span class="count comment-count">${fmt(eng.comments.length)}</span></button>
       </div>
       <div class="bottom-info">
-        <div class="name-row"><div class="name-avatar">${avatarInnerHTML()}</div><span class="name-text">${profile.name}</span></div>
+        <div class="name-row" data-goto-profile="1"><div class="name-avatar">${avatarInnerHTML()}</div><span class="name-text">${profile.name}</span></div>
         <p class="title-line">${item.title}</p>
-        ${attribution}
       </div>
     `;
     const vidEl = el.querySelector('video');
@@ -519,6 +538,40 @@
   });
 
   function getCardData(card){ return getEngagement(card.dataset.realId); }
+
+  // ---------- PULL-TO-REFRESH (pull down from the top of Home to reload the page) ----------
+  const pullRefreshEl = document.getElementById('pullRefresh');
+  const PULL_THRESHOLD = 80;
+  let pullStartY = null, pullDist = 0, pullReady = false;
+
+  feedEl.addEventListener('touchstart', (e)=>{
+    if(feedEl.scrollTop <= 0){ pullStartY = e.touches[0].clientY; } else { pullStartY = null; }
+  }, {passive:true});
+
+  feedEl.addEventListener('touchmove', (e)=>{
+    if(pullStartY===null) return;
+    const dy = e.touches[0].clientY - pullStartY;
+    if(dy <= 0){ pullDist = 0; pullRefreshEl.style.transform = 'translate(-50%,-60px)'; pullRefreshEl.classList.remove('ready'); return; }
+    pullDist = dy;
+    const offset = Math.min(dy*0.5, 90) - 60;
+    pullRefreshEl.style.transform = `translate(-50%, ${offset}px)`;
+    pullReady = dy > PULL_THRESHOLD;
+    pullRefreshEl.classList.toggle('ready', pullReady);
+  }, {passive:true});
+
+  feedEl.addEventListener('touchend', ()=>{
+    if(pullStartY===null) return;
+    if(pullReady){
+      pullRefreshEl.style.transform = 'translate(-50%, 20px)';
+      pullRefreshEl.classList.add('spinning');
+      setTimeout(()=> location.reload(), 300);
+    } else {
+      pullRefreshEl.style.transform = 'translate(-50%,-60px)';
+      pullRefreshEl.classList.remove('ready');
+    }
+    pullStartY = null; pullDist = 0; pullReady = false;
+  });
+
 
   // progress bar
   feedEl.addEventListener('timeupdate', (e)=>{
@@ -569,6 +622,7 @@
     if(e.target.closest('.like-btn')){ e.stopPropagation(); doLike(card,false); return; }
     if(e.target.closest('.comment-btn')){ e.stopPropagation(); openComments(card); return; }
     if(e.target.closest('.share-btn')){ e.stopPropagation(); openShare(card); return; }
+    if(e.target.closest('.name-row')){ e.stopPropagation(); document.querySelector('.nav-item[data-screen="profile"]').click(); return; }
   }, true);
 
   // ---------- COMMENTS ----------
@@ -641,8 +695,8 @@
         else toast('Link copied');
       } else if(kind==='info'){
         const realId = activeCard.dataset.realId;
-        const attrText = activeCard.querySelector('.attribution span') ? activeCard.querySelector('.attribution span').textContent : '';
-        toast('ID #' + shortId(realId) + (attrText ? ' · ' + attrText : ''));
+        const eng = getCardData(activeCard);
+        toast('ID #' + shortId(realId) + ' · ' + fmt(eng.views||0) + ' views');
       } else if(kind==='save'){ toast('Video saved'); }
       else if(kind==='report'){ toast('Thanks — report submitted'); }
       else { toast('Shared'); }
@@ -737,15 +791,23 @@
       peopleList.innerHTML = `<div class="empty-state">No one here yet — add a name below.</div>`;
       return;
     }
+    const btnLabel = activeListKey==='following' ? 'Following' : 'Remove';
+    const btnClass = activeListKey==='following' ? 'premove is-following' : 'premove';
     peopleList.innerHTML = arr.map((n,i)=>`
       <div class="people-row">
         <div class="pinit">${n.trim().charAt(0).toUpperCase()}</div>
         <div class="pname2">${n}</div>
-        <button class="premove" data-i="${i}">Remove</button>
+        <button class="${btnClass}" data-i="${i}">${btnLabel}</button>
       </div>`).join('');
     peopleList.querySelectorAll('.premove').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        social[activeListKey].splice(Number(btn.dataset.i),1);
+        const i = Number(btn.dataset.i);
+        if(activeListKey==='following'){
+          // Tapping "Following" unfollows (removes); the list re-renders so indices stay correct
+          social.following.splice(i,1);
+        } else {
+          social.followers.splice(i,1);
+        }
         saveSocial(); renderPeopleList(); renderProfileStats();
       });
     });
@@ -818,9 +880,16 @@
       return;
     }
     uploadRecords.forEach(r=>{
+      const eng = getEngagement(r.id);
       const tile = document.createElement('div'); tile.className='tile';
       const url = URL.createObjectURL(r.blob);
-      tile.innerHTML = `<video src="${url}" muted preload="metadata"></video><div class="tile-shade"></div><div class="tile-meta">${r.caption}</div>`;
+      tile.innerHTML = `<video src="${url}" muted loop preload="metadata"></video><div class="tile-shade"></div><div class="tile-meta views-meta">${EYE_ICON}<span>${fmt(eng.views||0)} views</span></div>`;
+      const tileVid = tile.querySelector('video');
+      tile.addEventListener('click', ()=>{
+        document.querySelectorAll('#profileGrid video').forEach(v=>{ if(v!==tileVid){ v.pause(); v.muted=true; } });
+        if(tileVid.paused){ tileVid.muted=false; tileVid.play().catch(()=>{ tileVid.muted=true; tileVid.play().catch(()=>{}); }); }
+        else { tileVid.pause(); }
+      });
       grid.appendChild(tile);
     });
   }
@@ -866,9 +935,9 @@
     const id = 'you_'+Date.now();
     const caption = uploadCaption.value.trim() || 'My real video';
     uploadBlobCache[id] = pendingFile;
-    engagementStore[id] = { likes:0, liked:false, shares:0, comments:[] };
-    await dbPut({ id, blob:pendingFile, caption, likes:0, liked:false, shares:0, comments:[], timestamp:Date.now() });
-    uploadRecords.unshift({ id, blob:pendingFile, caption, likes:0, liked:false, shares:0, comments:[], timestamp:Date.now() });
+    engagementStore[id] = { likes:0, liked:false, shares:0, comments:[], views:0 };
+    await dbPut({ id, blob:pendingFile, caption, likes:0, liked:false, shares:0, comments:[], views:0, timestamp:Date.now() });
+    uploadRecords.unshift({ id, blob:pendingFile, caption, likes:0, liked:false, shares:0, comments:[], views:0, timestamp:Date.now() });
     const item = { id, realId:id, title:caption, src:pendingBlobUrl, timestamp:Date.now() };
     feedItems.unshift(item);
     prependCard(item);
