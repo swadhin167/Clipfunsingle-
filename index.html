@@ -35,9 +35,9 @@
   .top-tabs span.active::after{content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:22px; height:3px; border-radius:3px; background:var(--accent);}
 
   /* ---------- FEED ---------- */
-  .feed{position:absolute; inset:0; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; height:100%;}
+  .feed{position:absolute; inset:0; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; height:100%;}
   .feed::-webkit-scrollbar{display:none;}
-  .video-card{position:relative; width:100%; height:100%; scroll-snap-align:start; scroll-snap-stop:always; display:flex; align-items:flex-end; overflow:hidden; background:#000;}
+  .video-card{position:relative; width:100%; height:100%; scroll-snap-align:start; display:flex; align-items:flex-end; overflow:hidden; background:#000;}
   .video-card video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
   .vignette{position:absolute; inset:0; pointer-events:none; background:linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 100%);}
   .progress-track{position:absolute; bottom:calc(58px + var(--safe-bottom)); left:0; right:0; height:2.5px; background:rgba(255,255,255,.18); z-index:20;}
@@ -65,7 +65,7 @@
   /* ---------- BOTTOM INFO ---------- */
   .bottom-info{position:absolute; left:14px; right:70px; bottom:100px; z-index:25;}
   .name-row{display:flex; align-items:center; gap:9px; margin-bottom:9px; cursor:pointer; width:fit-content;}
-  .name-avatar{width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid #fff; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .name-avatar{width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid #fff; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;}
   .name-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .name-avatar .initial{font-size:14px; font-weight:700; color:#fff;}
   .name-text{font-size:14.5px; font-weight:700;}
@@ -80,8 +80,9 @@
   .nav-item{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--text-faint); cursor:pointer; height:100%;}
   .nav-item.active{color:#fff;}
   .nav-item svg{width:24px; height:24px;}
+  .nav-item svg.msg-icon{width:21px; height:21px;}
   .nav-label{font-size:10.5px; font-weight:600;}
-  .nav-upload{width:44px; height:32px; border-radius:9px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center;}
+  .nav-upload{width:44px; height:32px; border-radius:9px; background:var(--accent); display:flex; align-items:center; justify-content:center;}
   .nav-upload svg{width:22px; height:22px;}
 
   /* ---------- SCREENS ---------- */
@@ -97,7 +98,7 @@
   .tile .tile-shade{position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.75), transparent 55%); z-index:1;}
 
   .profile-head{display:flex; flex-direction:column; align-items:center; padding:10px 16px 18px;}
-  .profile-head .pavatar{width:78px; height:78px; border-radius:50%; border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; background:var(--surface-2); font-size:28px; font-weight:700; overflow:hidden; cursor:pointer;}
+  .profile-head .pavatar{width:118px; height:118px; border-radius:50%; border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; background:var(--surface-2); font-size:40px; font-weight:700; overflow:hidden; cursor:pointer; position:relative;}
   .profile-head .pavatar img{width:100%; height:100%; object-fit:cover; display:block;}
   .profile-head .pname{margin-top:10px; font-size:18px; font-weight:700;}
   .profile-head .phandle{color:var(--text-faint); font-size:13px; margin-top:2px;}
@@ -107,7 +108,7 @@
   .edit-avatar-preview img{width:100%; height:100%; object-fit:cover; display:block;}
   .change-photo-btn{margin-top:10px; font-size:13px; color:var(--accent); font-weight:600; cursor:pointer; background:none; border:none;}
   .edit-name-input{width:100%; margin-top:18px; background:var(--surface-2); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:12px 14px; color:#fff; font-size:14.5px; font-family:inherit;}
-  .edit-save-btn{width:100%; margin-top:16px; padding:12px; border-radius:10px; border:none; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; font-weight:700; font-size:14.5px;}
+  .edit-save-btn{width:100%; margin-top:16px; padding:12px; border-radius:10px; border:none; cursor:pointer; background:var(--accent); color:#fff; font-weight:700; font-size:14.5px;}
   .stats-row{display:flex; gap:28px; margin-top:16px;}
   .stats-row div{text-align:center;}
   .stat-click{cursor:pointer;}
@@ -125,13 +126,19 @@
   .back-row{position:absolute; top:0; left:0; right:0; padding:calc(14px + var(--safe-top)) 16px 12px; background:var(--bg); z-index:2; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; gap:12px;}
   .back-btn{background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;}
   .back-title{font-size:17px; font-weight:700;}
+  .chat-header-avatar{position:relative; width:34px; height:34px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;}
+  .chat-header-avatar::after{content:""; position:absolute; right:-1px; bottom:-1px; width:11px; height:11px; background:#3ddc65; border:2px solid var(--bg); border-radius:50%;}
 
-  .new-chat-row{display:flex; gap:10px; align-items:center; padding:12px 16px 4px;}
-  .new-chat-row input{flex:1; background:var(--surface); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
-  .new-chat-row input::placeholder{color:var(--text-faint);}
+  .new-chat-row{padding:12px 16px 4px;}
+  .new-msg-btn{width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--surface); border:1px solid rgba(255,255,255,.1); color:#fff; font-size:13.5px; font-weight:600; padding:11px; border-radius:10px; cursor:pointer;}
+  .new-msg-btn svg{width:15px; height:15px;}
 
   .chat-row{display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.05);}
   .chat-row .cinit{width:46px; height:46px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; flex-shrink:0;}
+  .avatar-wrap-dot{position:relative; flex-shrink:0;}
+  .online-dot{position:absolute; bottom:1px; right:1px; width:11px; height:11px; border-radius:50%; background:#3BD671; border:2px solid var(--bg); cursor:pointer;}
+  .online-dot.off{background:#5a5a5a;}
+  .people-row .online-dot{width:12px; height:12px; border:2px solid var(--surface);}
   .chat-row .cinfo{flex:1; min-width:0;}
   .chat-row .cname{font-size:14.5px; font-weight:700;}
   .chat-row .cpreview{font-size:12.5px; color:var(--text-faint); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -144,6 +151,7 @@
   .chat-reel-bubble video{width:100%; max-height:220px; display:block; background:#000; object-fit:cover;}
   .chat-reel-caption{padding:8px 10px; font-size:12.5px; color:var(--text-dim);}
   .chat-time{font-size:10.5px; color:var(--text-faint); text-align:right; margin-top:3px; margin-right:2px;}
+  .chat-seen{font-size:10.5px; color:#3ddc65; text-align:right; margin-top:1px; margin-right:2px;}
   .chat-input-row{position:absolute; left:0; right:0; bottom:0; display:flex; gap:10px; align-items:center; padding:10px 14px; padding-bottom:calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.07); background:var(--bg);}
   .chat-input-row input{flex:1; background:var(--surface-2); border:none; border-radius:20px; padding:10px 16px; color:#fff; font-size:14px; font-family:inherit;}
   .chat-input-row input::placeholder{color:var(--text-faint);}
@@ -162,6 +170,7 @@
 
   .people-list{overflow-y:auto; padding:6px 16px; flex:1;}
   .people-row{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05);}
+  .people-row.selectable{cursor:pointer;}
   .people-row .pinit{width:36px; height:36px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;}
   .people-row .pname2{flex:1; font-size:14px; font-weight:600;}
   .people-row .premove{background:none; border:1px solid rgba(255,255,255,.15); color:var(--text-faint); font-size:12px; padding:6px 12px; border-radius:8px; cursor:pointer;}
@@ -185,7 +194,7 @@
   .preview-wrap video{width:100%; max-height:340px; display:block; object-fit:contain; background:#000;}
   .caption-input{width:100%; margin-top:16px; background:var(--surface); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:12px 14px; color:#fff; font-size:14px; font-family:inherit; resize:none; min-height:70px;}
   .caption-input::placeholder{color:var(--text-faint);}
-  .post-btn{width:100%; margin-top:16px; padding:13px; border-radius:10px; border:none; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; font-weight:700; font-size:15px;}
+  .post-btn{width:100%; margin-top:16px; padding:13px; border-radius:10px; border:none; cursor:pointer; background:var(--accent); color:#fff; font-weight:700; font-size:15px;}
   .post-btn:disabled{opacity:.4; cursor:not-allowed;}
 
   /* ---------- SHEETS ---------- */
@@ -240,16 +249,13 @@
 
   <div class="screen" id="screen-messages">
     <div class="screen-header">Messages</div>
-    <div class="new-chat-row">
-      <input type="text" id="newChatInput" placeholder="Start a chat with a name...">
-      <button class="send-btn" id="newChatBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
-    </div>
     <div id="chatList"></div>
   </div>
 
   <div class="screen" id="screen-chat" style="padding-top:0;">
     <div class="back-row">
       <button class="back-btn" id="chatBackBtn">‹</button>
+      <div class="chat-header-avatar" id="chatHeaderAvatar"></div>
       <div class="back-title" id="chatContactName">Name</div>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
@@ -267,7 +273,6 @@
     <div class="profile-head">
       <div class="pavatar" id="profileAvatar">🙂</div>
       <div class="pname" id="profileNameDisplay">you.creates</div>
-      <div class="phandle">this device's activity</div>
       <button class="edit-profile-btn" id="editProfileBtn">Edit profile</button>
       <div class="stats-row">
         <div><div class="stat-num" id="statPosts">0</div><div class="stat-label">Posts</div></div>
@@ -308,7 +313,7 @@
       <div class="nav-upload"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></div>
     </div>
     <div class="nav-item" data-screen="messages">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <svg class="msg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
       <span class="nav-label">Messages</span>
     </div>
     <div class="nav-item" data-screen="profile">
@@ -335,8 +340,8 @@
     <div class="sheet-title">Share to</div>
     <div class="share-grid">
       <div class="share-opt" data-opt="link"><div class="ic" style="background:#33343a;">🔗</div>Copy link</div>
+      <div class="share-opt" data-opt="send"><div class="ic" style="background:var(--accent);">➤</div>Send to...</div>
       <div class="share-opt" data-opt="whatsapp"><div class="ic" style="background:#25D366;">✆</div>WhatsApp</div>
-      <div class="share-opt" data-opt="messages"><div class="ic" style="background:#3B82F6;">✉</div>Messages</div>
       <div class="share-opt" data-opt="info"><div class="ic" style="background:#8B5CF6;">ℹ</div>Upload info</div>
       <div class="share-opt" data-opt="save"><div class="ic" style="background:#F59E0B;">⬇</div>Save video</div>
       <div class="share-opt" data-opt="report"><div class="ic" style="background:#EF4444;">⚑</div>Report</div>
@@ -370,6 +375,12 @@
     <div class="sheet-handle"></div>
     <div class="sheet-title">Send a reel</div>
     <div class="reel-picker-grid" id="reelPickerGrid"></div>
+  </div>
+
+  <div class="sheet" id="contactPickerSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="contactPickerTitle">Select a person</div>
+    <div class="people-list" id="contactPickerList"></div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -414,6 +425,13 @@
   function loadSocial(){ try{ return JSON.parse(localStorage.getItem(SOCIAL_KEY)) || {following:[], followers:[]}; }catch(e){ return {following:[], followers:[]}; } }
   let social = loadSocial();
   function saveSocial(){ try{ localStorage.setItem(SOCIAL_KEY, JSON.stringify(social)); }catch(e){} }
+
+  // Online status is self-declared by you for each person — a real, honest toggle (this app has no live presence server)
+  const ONLINE_KEY = 'snapclip_online_v1';
+  function loadOnline(){ try{ return JSON.parse(localStorage.getItem(ONLINE_KEY)) || []; }catch(e){ return []; } }
+  let onlineSet = new Set(loadOnline());
+  function saveOnline(){ try{ localStorage.setItem(ONLINE_KEY, JSON.stringify(Array.from(onlineSet))); }catch(e){} }
+  function toggleOnline(name){ if(onlineSet.has(name)) onlineSet.delete(name); else onlineSet.add(name); saveOnline(); }
 
   function seededNum(seedStr, base, spread){
     let h=0; for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i))>>>0; }
@@ -694,7 +712,7 @@
   let activeCard = null;
 
   function openSheet(s){ backdrop.classList.add('show'); s.classList.add('show'); }
-  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); document.getElementById('peopleSheet').classList.remove('show'); document.getElementById('reelPickerSheet').classList.remove('show'); }
+  function closeSheets(){ backdrop.classList.remove('show'); commentSheet.classList.remove('show'); shareSheet.classList.remove('show'); editProfileSheet.classList.remove('show'); document.getElementById('peopleSheet').classList.remove('show'); document.getElementById('reelPickerSheet').classList.remove('show'); document.getElementById('contactPickerSheet').classList.remove('show'); }
   backdrop.addEventListener('click', closeSheets);
 
   function openComments(card){
@@ -737,6 +755,19 @@
   document.querySelectorAll('.share-opt').forEach(opt=>{
     opt.addEventListener('click', ()=>{
       const kind = opt.dataset.opt;
+      if(kind==='send'){
+        const cardForSend = activeCard;
+        openContactPicker(social.following, 'Send to a real person you follow', (name)=>{
+          const realId = cardForSend.dataset.realId;
+          sendReel(realId, name);
+          const eng = getCardData(cardForSend);
+          eng.shares += 1;
+          document.querySelectorAll(`.video-card[data-real-id="${realId}"] .share-count`).forEach(el=> el.textContent = fmt(eng.shares));
+          persist(realId);
+          toast('Sent to ' + name);
+        });
+        return;
+      }
       if(activeCard){
         const realId = activeCard.dataset.realId;
         const eng = getCardData(activeCard);
@@ -852,10 +883,16 @@
     const btnClass = activeListKey==='following' ? 'premove is-following' : 'premove';
     peopleList.innerHTML = arr.map((n,i)=>`
       <div class="people-row">
-        <div class="pinit">${n.trim().charAt(0).toUpperCase()}</div>
+        <div class="avatar-wrap-dot">
+          <div class="pinit">${n.trim().charAt(0).toUpperCase()}</div>
+          <div class="online-dot ${onlineSet.has(n)?'':'off'}" data-name="${n}" title="Tap to mark online/offline"></div>
+        </div>
         <div class="pname2">${n}</div>
         <button class="${btnClass}" data-i="${i}">${btnLabel}</button>
       </div>`).join('');
+    peopleList.querySelectorAll('.online-dot').forEach(dot=>{
+      dot.addEventListener('click', ()=>{ toggleOnline(dot.dataset.name); renderPeopleList(); renderChatList(); });
+    });
     peopleList.querySelectorAll('.premove').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.dataset.i);
@@ -919,10 +956,11 @@
       return;
     }
     matches.forEach(r=>{
+      const eng = getEngagement(r.id);
       const url = URL.createObjectURL(r.blob);
       const tile = document.createElement('div');
       tile.className='tile';
-      tile.innerHTML = `<video src="${url}" muted preload="metadata"></video><div class="tile-shade"></div><div class="tile-meta">${r.caption}</div>`;
+      tile.innerHTML = `<video src="${url}" muted preload="metadata"></video><div class="tile-shade"></div><div class="tile-meta views-meta">${EYE_ICON}<span>${fmt(eng.views||0)} views</span></div>`;
       grid.appendChild(tile);
     });
   }
@@ -966,7 +1004,7 @@
   function saveMessages(){ try{ localStorage.setItem(MESSAGES_KEY, JSON.stringify(messagesStore)); }catch(e){} }
 
   function getContacts(){
-    const set = new Set([...social.following, ...social.followers, ...Object.keys(messagesStore)]);
+    const set = new Set(social.following);
     return Array.from(set);
   }
   function lastMessageOf(name){
@@ -977,7 +1015,7 @@
     const list = document.getElementById('chatList');
     const contacts = getContacts();
     if(contacts.length===0){
-      list.innerHTML = `<div class="empty-state">No chats yet — add someone in Followers/Following, or start a new chat above.</div>`;
+      list.innerHTML = `<div class="empty-state">Follow someone real first — go to Profile → Following and add a name. Everyone you follow shows up here automatically.</div>`;
       return;
     }
     list.innerHTML = contacts.map(name=>{
@@ -996,34 +1034,51 @@
   }
 
   let activeChatName = null;
+  // ---------- SEEN (real, local read-receipt: when you last opened this chat) ----------
+  const SEEN_KEY = 'snapclip_seen_v1';
+  function loadSeen(){ try{ return JSON.parse(localStorage.getItem(SEEN_KEY)) || {}; }catch(e){ return {}; } }
+  let seenStore = loadSeen();
+  function saveSeen(){ try{ localStorage.setItem(SEEN_KEY, JSON.stringify(seenStore)); }catch(e){} }
+
   function openChat(name){
     activeChatName = name;
     document.getElementById('chatContactName').textContent = name;
+    document.getElementById('chatHeaderAvatar').textContent = name.trim().charAt(0).toUpperCase();
     document.getElementById('screen-messages').classList.remove('show');
     document.getElementById('screen-chat').classList.add('show');
-    renderChatMessages();
+    const prevSeenAt = seenStore[name];
+    renderChatMessages(prevSeenAt);
+    seenStore[name] = Date.now();
+    saveSeen();
   }
   function closeChat(){
     document.getElementById('screen-chat').classList.remove('show');
     document.getElementById('screen-messages').classList.add('show');
     renderChatList();
   }
-  function renderChatMessages(){
+  function renderChatMessages(prevSeenAt){
     const box = document.getElementById('chatMessages');
     const arr = messagesStore[activeChatName] || [];
     if(arr.length===0){
       box.innerHTML = `<div class="empty-state">No messages yet with ${activeChatName}. Say hello or send one of your reels.</div>`;
     } else {
-      box.innerHTML = arr.map(m=>{
+      box.innerHTML = arr.map((m,i)=>{
+        const isLast = i===arr.length-1;
+        let seenLine = '';
+        if(isLast){
+          const seenLabel = (prevSeenAt && prevSeenAt >= m.ts) ? timeAgo(prevSeenAt) : 'just now';
+          seenLine = `<div class="chat-seen">Seen ${seenLabel}</div>`;
+        }
         if(m.type==='reel'){
           const rec = uploadRecords.find(r=>r.id===m.videoId);
           const url = rec ? URL.createObjectURL(rec.blob) : '';
           return `<div class="chat-bubble-row"><div>
             <div class="chat-reel-bubble">${url ? `<video src="${url}" muted loop preload="metadata"></video>` : ''}<div class="chat-reel-caption">${m.caption||''}</div></div>
             <div class="chat-time">${timeAgo(m.ts)}</div>
+            ${seenLine}
           </div></div>`;
         }
-        return `<div class="chat-bubble-row"><div><div class="chat-bubble">${m.text}</div><div class="chat-time">${timeAgo(m.ts)}</div></div></div>`;
+        return `<div class="chat-bubble-row"><div><div class="chat-bubble">${m.text}</div><div class="chat-time">${timeAgo(m.ts)}</div>${seenLine}</div></div>`;
       }).join('');
     }
     box.scrollTop = box.scrollHeight;
@@ -1041,29 +1096,40 @@
     input.value='';
     renderChatMessages();
   }
-  function sendReel(videoId){
-    if(!activeChatName) return;
+  function sendReel(videoId, targetName){
+    const name = targetName || activeChatName;
+    if(!name) return;
     const rec = uploadRecords.find(r=>r.id===videoId);
     if(!rec) return;
-    messagesStore[activeChatName] = messagesStore[activeChatName] || [];
-    messagesStore[activeChatName].push({type:'reel', videoId, caption:rec.caption, ts:Date.now()});
+    messagesStore[name] = messagesStore[name] || [];
+    messagesStore[name].push({type:'reel', videoId, caption:rec.caption, ts:Date.now()});
     saveMessages();
     closeSheets();
-    renderChatMessages();
+    if(name===activeChatName) renderChatMessages();
   }
   document.getElementById('chatSendBtn').addEventListener('click', sendText);
   document.getElementById('chatTextInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendText(); });
   document.getElementById('chatBackBtn').addEventListener('click', closeChat);
-  document.getElementById('newChatBtn').addEventListener('click', ()=>{
-    const input = document.getElementById('newChatInput');
-    const name = input.value.trim();
-    if(!name) return;
-    messagesStore[name] = messagesStore[name] || [];
-    saveMessages();
-    input.value='';
-    openChat(name);
-  });
-  document.getElementById('newChatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('newChatBtn').click(); });
+
+  // Generic picker: shows a list of real people (from Followers/Following) and runs onPick(name) when tapped
+  function openContactPicker(list, title, onPick){
+    const sheet = document.getElementById('contactPickerSheet');
+    document.getElementById('contactPickerTitle').textContent = title;
+    const box = document.getElementById('contactPickerList');
+    if(list.length===0){
+      box.innerHTML = `<div class="empty-state">No one here yet. Add a real person first — go to Profile → Following or Followers and add a name.</div>`;
+    } else {
+      box.innerHTML = list.map(n=>`
+        <div class="people-row selectable" data-name="${n}">
+          <div class="pinit">${n.trim().charAt(0).toUpperCase()}</div>
+          <div class="pname2">${n}</div>
+        </div>`).join('');
+      box.querySelectorAll('.people-row').forEach(row=>{
+        row.addEventListener('click', ()=>{ closeSheets(); onPick(row.dataset.name); });
+      });
+    }
+    openSheet(sheet);
+  }
 
   document.getElementById('chatAttachBtn').addEventListener('click', ()=>{
     const grid = document.getElementById('reelPickerGrid');
