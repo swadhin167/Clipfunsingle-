@@ -51,44 +51,44 @@
   .like-burst.show svg{animation:burst .75s cubic-bezier(.2,.9,.3,1) forwards;}
   @keyframes burst{0%{opacity:0; transform:scale(.3) rotate(-8deg);}30%{opacity:1; transform:scale(1.15) rotate(3deg);}45%{transform:scale(1) rotate(0);}80%{opacity:1;}100%{opacity:0; transform:scale(1.05);}}
 
-  /* ---------- AFFILIATE BOX on video ---------- */
+  /* ---------- AFFILIATE BOX on video (small) ---------- */
   .affiliate-box{
     position:absolute;
     left:12px;
-    bottom:175px;
+    bottom:168px;
     z-index:26;
     display:flex;
     align-items:center;
-    gap:8px;
-    background:rgba(20,20,22,0.94);
+    gap:6px;
+    background:rgba(18,18,20,0.93);
     backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,0.14);
-    border-radius:12px;
-    padding:6px 12px 6px 6px;
-    max-width:210px;
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:9px;
+    padding:3px 7px 3px 3px;
+    max-width:148px;
     cursor:pointer;
-    box-shadow:0 4px 18px rgba(0,0,0,0.45);
+    box-shadow:0 3px 12px rgba(0,0,0,0.4);
     transition:transform .15s ease;
   }
   .affiliate-box:active{transform:scale(0.96);}
   .affiliate-box img{
-    width:46px; height:46px; border-radius:8px; object-fit:cover; flex-shrink:0; background:#333;
+    width:32px; height:32px; border-radius:6px; object-fit:cover; flex-shrink:0; background:#333;
   }
   .aff-placeholder{
-    width:46px; height:46px; border-radius:8px; background:linear-gradient(135deg,#333,#555);
-    display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
+    width:32px; height:32px; border-radius:6px; background:linear-gradient(135deg,#333,#555);
+    display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;
   }
   .affiliate-meta{min-width:0;}
   .affiliate-title{
-    font-size:12.5px; font-weight:600; color:#fff;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px;
+    font-size:10.5px; font-weight:600; color:#fff;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:95px;
   }
   .affiliate-label{
-    font-size:10px; color:var(--accent-2); font-weight:700; margin-top:2px; letter-spacing:.3px;
-    display:flex; align-items:center; gap:5px;
+    font-size:8.5px; color:var(--accent-2); font-weight:700; margin-top:1px;
+    display:flex; align-items:center; gap:3px;
   }
   .platform-badge{
-    font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px;
+    font-size:7.5px; font-weight:700; padding:1px 4px; border-radius:3px;
     background:rgba(255,255,255,0.15); color:#fff;
   }
 
@@ -673,9 +673,9 @@
     let affiliateHTML = '';
     if(item.affiliate && (item.affiliate.title || item.affiliate.url)){
       const imgSrc = item.affiliate.image || '';
-      const shortTitle = (item.affiliate.title || 'Product').substring(0, 26);
+      const shortTitle = (item.affiliate.title || 'Product').substring(0, 18);
       const platform = detectPlatform(item.affiliate.url);
-      const priceTag = item.affiliate.price ? ` · ${item.affiliate.price}` : '';
+      const priceTag = item.affiliate.price ? item.affiliate.price : '';
       affiliateHTML = `
         <div class="affiliate-box" data-real-id="${item.realId}">
           ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.outerHTML='<div class=\\'aff-placeholder\\'>🛍️</div>'">` : `<div class="aff-placeholder">🛍️</div>`}
@@ -683,7 +683,7 @@
             <div class="affiliate-title">${shortTitle}</div>
             <div class="affiliate-label">
               <span class="platform-badge" style="background:${platform.color}">${platform.name}</span>
-              ${priceTag}
+              ${priceTag ? `<span style="color:#fff;opacity:.9">${priceTag}</span>` : ''}
             </div>
           </div>
         </div>`;
@@ -1198,105 +1198,106 @@
     return null;
   }
 
+  async function tryMicrolink(url){
+    try {
+      const apiUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&meta=true`;
+      const res = await fetch(apiUrl, {signal: AbortSignal.timeout(10000)});
+      const data = await res.json();
+      if(data.status === 'success' && data.data){
+        const d = data.data;
+        return {
+          title: d.title || null,
+          image: (d.image && d.image.url) || (d.logo && d.logo.url) || null,
+          description: d.description || '',
+          price: d.price || null
+        };
+      }
+    } catch(e){}
+    return null;
+  }
+
+  async function tryJsonLink(url){
+    try {
+      const apiUrl = `https://jsonlink.io/api/extract?url=${encodeURIComponent(url)}`;
+      const res = await fetch(apiUrl, {signal: AbortSignal.timeout(10000)});
+      const data = await res.json();
+      if(data && (data.title || data.images)){
+        return {
+          title: data.title || null,
+          image: (data.images && data.images[0]) || data.image || null,
+          description: data.description || '',
+          price: null
+        };
+      }
+    } catch(e){}
+    return null;
+  }
+
   async function fetchProductDetails(){
     const url = affUrl.value.trim();
     if(!url){ affStatus.textContent = 'Please paste a product link first'; return; }
     if(!url.startsWith('http')){ affStatus.textContent = 'Link must start with https://'; return; }
 
     fetchBtn.disabled = true;
-    fetchBtn.textContent = 'Fetching...';
-    affStatus.textContent = 'Getting real product details...';
+    fetchBtn.textContent = '...';
+    affStatus.textContent = 'Fetching product image & price...';
     affStatus.style.color = 'var(--text-faint)';
     affPreview.classList.remove('show');
     fetchedAffiliate = null;
 
     const platform = detectPlatform(url);
 
-    try {
-      // Microlink API - best free option for Open Graph + meta
-      const apiUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&palette=false&audio=false&video=false&iframe=false&meta=true`;
-      const res = await fetch(apiUrl, {signal: AbortSignal.timeout(12000)});
-      const data = await res.json();
-
-      if(data.status === 'success' && data.data){
-        const d = data.data;
-
-        let title = d.title || d.publisher || platform.name + ' Product';
-        // Clean common junk from titles
-        title = title.replace(/\s*[\|\-–—]\s*(Amazon\.in|Flipkart|Myntra|Meesho|Ajio|Nykaa).*$/i, '').trim();
-        title = title.substring(0, 120);
-
-        let image = null;
-        if(d.image && d.image.url) image = d.image.url;
-        else if(d.logo && d.logo.url) image = d.logo.url;
-
-        let description = d.description || '';
-        // Try harder for price
-        let price = extractPrice(title) || extractPrice(description) || extractPrice(d.publisher || '');
-
-        // Extra: some sites put price in og:description or title clearly
-        if(!price && d.price) price = d.price;
-
-        fetchedAffiliate = {
-          title: title,
-          image: image,
-          description: description.substring(0, 220),
-          price: price,
-          url: url,
-          platform: platform.name
-        };
-
-        // Show preview
-        if(fetchedAffiliate.image){
-          affPreviewImg.src = fetchedAffiliate.image;
-          affPreviewImg.style.display = 'block';
-          affPreviewImg.onerror = ()=>{ affPreviewImg.style.display = 'none'; };
-        } else {
-          affPreviewImg.style.display = 'none';
-        }
-
-        affPreviewTitle.textContent = fetchedAffiliate.title;
-        let descLine = platform.name;
-        if(fetchedAffiliate.price) descLine += '  ·  ' + fetchedAffiliate.price;
-        if(fetchedAffiliate.description) descLine += '  ·  ' + fetchedAffiliate.description.substring(0,60);
-        affPreviewDesc.textContent = descLine;
-        affPreview.classList.add('show');
-
-        affStatus.textContent = `✅ ${platform.name} product loaded` + (price ? ` · ${price}` : '');
-        affStatus.style.color = '#3ddc65';
-      } else {
-        // Soft fallback
-        fetchedAffiliate = {
-          title: platform.name + ' Product',
-          image: null,
-          description: url,
-          price: null,
-          url: url,
-          platform: platform.name
-        };
-        affPreviewTitle.textContent = fetchedAffiliate.title;
-        affPreviewDesc.textContent = url;
-        affPreviewImg.style.display = 'none';
-        affPreview.classList.add('show');
-        affStatus.textContent = 'Could not fetch full details. Link will still work.';
-        affStatus.style.color = 'var(--text-faint)';
+    let result = await tryMicrolink(url);
+    if(!result || !result.image){
+      // Second attempt with another free API
+      const result2 = await tryJsonLink(url);
+      if(result2){
+        result = result || {};
+        result.title = result.title || result2.title;
+        result.image = result.image || result2.image;
+        result.description = result.description || result2.description;
       }
-    } catch(err){
-      console.error(err);
-      fetchedAffiliate = {
-        title: platform.name + ' Product',
-        image: null,
-        description: url,
-        price: null,
-        url: url,
-        platform: platform.name
-      };
-      affPreviewTitle.textContent = fetchedAffiliate.title;
-      affPreviewDesc.textContent = url;
+    }
+
+    let title = (result && result.title) ? result.title : (platform.name + ' Product');
+    title = title.replace(/\s*[\|\-–—]\s*(Amazon\.in|Flipkart|Myntra|Meesho|Ajio|Nykaa|Buy Online).*$/i, '').trim();
+    title = title.substring(0, 100);
+
+    let image = (result && result.image) ? result.image : null;
+    let description = (result && result.description) ? result.description : '';
+    let price = (result && result.price) ? result.price : null;
+    if(!price) price = extractPrice(title) || extractPrice(description);
+
+    fetchedAffiliate = {
+      title: title,
+      image: image,
+      description: description.substring(0, 220),
+      price: price,
+      url: url,
+      platform: platform.name
+    };
+
+    // Show preview
+    if(fetchedAffiliate.image){
+      affPreviewImg.src = fetchedAffiliate.image;
+      affPreviewImg.style.display = 'block';
+      affPreviewImg.onerror = ()=>{ affPreviewImg.style.display = 'none'; };
+    } else {
       affPreviewImg.style.display = 'none';
-      affPreview.classList.add('show');
-      affStatus.textContent = 'Network issue / site blocked. Link will still be added.';
-      affStatus.style.color = 'var(--text-faint)';
+    }
+
+    affPreviewTitle.textContent = fetchedAffiliate.title;
+    let descLine = platform.name;
+    if(fetchedAffiliate.price) descLine += '  ·  ' + fetchedAffiliate.price;
+    affPreviewDesc.textContent = descLine;
+    affPreview.classList.add('show');
+
+    if(image || price){
+      affStatus.textContent = `✅ ${platform.name}` + (price ? ` · ${price}` : '') + (image ? ' · Image loaded' : '');
+      affStatus.style.color = '#3ddc65';
+    } else {
+      affStatus.textContent = '⚠️ Image/price not found (site blocked). Link will still work.';
+      affStatus.style.color = '#FFD23F';
     }
 
     fetchBtn.disabled = false;
